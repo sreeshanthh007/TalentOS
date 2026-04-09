@@ -1,17 +1,12 @@
 import { Router } from 'express';
-import { Resolver } from '@di/index';
-import { asyncHandler } from '@shared/utils/asyncHandler';
+import { Resolver } from '@di/resolver';
 
-const authRouter = Router();
+const router = Router();
 
-authRouter.post('/register', asyncHandler((req, res, next) => 
-  Resolver.authController.register(req, res, next)
-));
-authRouter.post('/login', asyncHandler((req, res, next) => 
-  Resolver.authController.login(req, res, next)
-));
-authRouter.post('/refresh-token', asyncHandler((req, res, next) => 
-  Resolver.authController.refreshToken(req, res, next)
-));
+router.post('/register/candidate', (req, res, next) => Resolver.authController.registerCandidate(req, res, next));
+router.post('/register/employer', (req, res, next) => Resolver.authController.registerEmployer(req, res, next));
+router.post('/login', (req, res, next) => Resolver.authController.login(req, res, next));
+router.post('/refresh-token', (req, res, next) => Resolver.authController.refreshToken(req, res, next));
+router.post('/logout', (req, res, next) => Resolver.authController.logout(req, res, next));
 
-export { authRouter };
+export { router as authRouter };

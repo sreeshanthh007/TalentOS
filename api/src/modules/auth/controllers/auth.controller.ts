@@ -1,69 +1,110 @@
-import { NextFunction, Request, Response } from 'express';
-import { RegisterUsecase } from '@modules/auth/usecases/register.usecase';
-import { LoginUsecase } from '@modules/auth/usecases/login.usecase';
-import { RefreshTokenUsecase } from '@modules/auth/usecases/refreshToken.usecase';
-import { registerSchema, loginSchema, refreshTokenSchema } from '@modules/auth/validators/auth.validator';
+import { Request, Response } from 'express';
+import { 
+  registerCandidateSchema, 
+  registerEmployerSchema, 
+  loginSchema, 
+  refreshTokenSchema 
+} from '../validators/auth.validator';
+import { asyncHandler } from '@shared/utils/asyncHandler';
 import { HTTP_STATUS } from '@shared/constants/statusCodes.constants';
 import { MESSAGES } from '@shared/constants/messages.constants';
+import { RegisterCandidateUsecase } from '../usecases/registerCandidate.usecase';
+import { RegisterEmployerUsecase } from '../usecases/registerEmployer.usecase';
+import { LoginUsecase } from '../usecases/login.usecase';
+import { RefreshTokenUsecase } from '../usecases/refreshToken.usecase';
+import { BlacklistTokenUseCase } from '../usecases/blacklistToken.usecase';
+import { RevokeRefreshTokenUseCase } from '../usecases/revokeRefreshToken.usecase';
+import { setAuthCookies, updateCookieWithAccessToken, clearAuthCookie } from '@shared/utils/cookie.util';
 
 export class AuthController {
   constructor(
-    private readonly registerUsecase: RegisterUsecase,
+    private readonly registerCandidateUsecase: RegisterCandidateUsecase,
+    private readonly registerEmployerUsecase: RegisterEmployerUsecase,
     private readonly loginUsecase: LoginUsecase,
-    private readonly refreshTokenUsecase: RefreshTokenUsecase
+    private readonly refreshTokenUsecase: RefreshTokenUsecase,
+    private readonly blacklistTokenUsecase: BlacklistTokenUseCase,
+    private readonly revokeRefreshTokenUsecase: RevokeRefreshTokenUseCase,
   ) {}
 
-  public register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const result = registerSchema.safeParse(req.body);
-    if (!result.success) {
-      res.status(HTTP_STATUS.BAD_REQUEST).json({
-        success: false,
-        message: result.error.issues[0].message
-      });
-      return;
-    }
+  registerCandidate = asyncHandler(async (req: Request, res: Response) => {
+    const validatedData = registerCandidateSchema.parse(req.body);
 
-    const user = await this.registerUsecase.execute(result.data);
+    await this.registerCandidateUsecase.execute(validatedData);
+    
+ 
+
     res.status(HTTP_STATUS.CREATED).json({
       success: true,
-      message: MESSAGES.AUTH.REGISTER_SUCCESS,
-      data: user
+      message: MESSAGES.AUTH.REGISTER_SUCCESS
     });
-  };
+  });
 
-  public login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const result = loginSchema.safeParse(req.body);
-    if (!result.success) {
-      res.status(HTTP_STATUS.BAD_REQUEST).json({
-        success: false,
-        message: result.error.issues[0].message
-      });
-      return;
-    }
+  registerEmployer = asyncHandler(async (req: Request, res: Response) => {
 
-    const data = await this.loginUsecase.execute(result.data);
+    const validatedData = registerEmployerSchema.parse(req.body);
+
+    await this.registerEmployerUsecase.execute(validatedData);
+    
+ 
+
+    res.status(HTTP_STATUS.CREATED).json({
+      success: true,
+      message: MESSAGES.AUTH.REGISTER_SUCCESS
+    });
+  });
+
+  login = asyncHandler(async (req: Request, res: Response) => {
+    const validatedData = loginSchema.parse(req.body);
+    const result = await this.loginUsecase.execute(validatedData);
+    
+    setAuthCookies(
+      res, 
+      result.accessToken, 
+      result.refreshToken, 
+      `${result.user.role}_access_token`, 
+      `${result.user.role}_refresh_token`
+    );
+
     res.status(HTTP_STATUS.OK).json({
       success: true,
       message: MESSAGES.AUTH.LOGIN_SUCCESS,
-      data
+      data: {
+        user: result.user,
+        accessToken: result.accessToken
+      }
     });
-  };
+  });
 
-  public refreshToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const result = refreshTokenSchema.safeParse(req.body);
-    if (!result.success) {
-      res.status(HTTP_STATUS.BAD_REQUEST).json({
-        success: false,
-        message: result.error.issues[0].message
-      });
-      return;
-    }
+  refreshToken = asyncHandler(async (req: Request, res: Response) => {
+    const role = req.body.role || 'candidate';
+    const refreshToken = req.cookies[`${role}_refresh_token`];
 
-    const tokens = await this.refreshTokenUsecase.execute(result.data);
+    const validatedData = refreshTokenSchema.parse({ refreshToken });
+    const result = await this.refreshTokenUsecase.execute(validatedData);
+    
+    updateCookieWithAccessToken(res, result.accessToken, `${role}_access_token`);
+
     res.status(HTTP_STATUS.OK).json({
       success: true,
       message: MESSAGES.AUTH.REFRESH_SUCCESS,
-      data: tokens
+      data: result
     });
-  };
+  });
+
+  logout = asyncHandler(async (req: Request, res: Response) => {
+    
+    const accessToken = req.headers.authorization?.split(' ')[1];
+    const role = req.body.role || 'candidate'; 
+    const refreshToken = req.cookies[`${role}_refresh_token`];
+
+    if (accessToken) await this.blacklistTokenUsecase.execute(accessToken);
+    if (refreshToken) await this.revokeRefreshTokenUsecase.execute(refreshToken);
+
+    clearAuthCookie(res, `${role}_access_token`, `${role}_refresh_token`);
+
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      message: "Logged out successfully"
+    });
+  });
 }
