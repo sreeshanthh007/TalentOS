@@ -1,31 +1,102 @@
-import { IAuthRepository } from '@modules/auth/interfaces/IAuthRepository';
-import { User } from '@modules/auth/models/user.model';
-import { RegisterInputDTO } from '@modules/auth/dtos/auth.dto';
+import { supabaseClient } from '@shared/config/db.config';
+import { IAuthRepository } from '../interfaces/IAuthRepository';
+import { UserModel, CreateUserData, CandidateProfileData, EmployerProfileData } from '../models/user.model';
+import { CustomError } from '@shared/utils/CustomError';
+import { HTTP_STATUS } from '@shared/constants/statusCodes.constants';
+import { ERROR_MESSAGES } from '@shared/constants/messages.constants';
 
 export class AuthRepository implements IAuthRepository {
-  constructor() {
-    // DB connection inject if needed manually
+  async findUserByEmail(email: string): Promise<UserModel | null> {
+    const { data, error } = await supabaseClient
+      .from('users')
+      .select('*')
+      .eq('email', email)
+      .maybeSingle();
+
+    if (error) {
+      throw new CustomError(ERROR_MESSAGES.SERVER_ERROR, HTTP_STATUS.INTERNAL_SERVER_ERROR);
+    }
+
+    return data as UserModel | null;
   }
 
-  async findByEmail(email: string): Promise<User | null> {
-    // TODO: DB lookup logic
-    return null;
+  async findUserById(id: string): Promise<UserModel | null> {
+    const { data, error } = await supabaseClient
+      .from('users')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (error) {
+      throw new CustomError(ERROR_MESSAGES.SERVER_ERROR, HTTP_STATUS.INTERNAL_SERVER_ERROR);
+    }
+
+    return data as UserModel | null;
   }
 
-  async findById(id: string): Promise<User | null> {
-    // TODO: DB lookup logic
-    return null;
+  async createUser(data: CreateUserData): Promise<UserModel> {
+    const { data: user, error } = await supabaseClient
+      .from('users')
+      .insert({
+        email: data.email,
+        password_hash: data.password_hash,
+        role: data.role
+      })
+      .select()
+      .single();
+
+    if (error) {
+      throw new CustomError(ERROR_MESSAGES.SERVER_ERROR, HTTP_STATUS.INTERNAL_SERVER_ERROR);
+    }
+
+    return user as UserModel;
   }
 
-  async create(data: RegisterInputDTO): Promise<User> {
-    // TODO: DB create logic
-    // return {
-    //   id: 'dummy-id',
-    //   email: data.email,
-    //   role: data.role,
-    //   password: data.password,
-    //   createdAt: new Date()
-    // } as User;
-    throw new Error('Method not implemented.');
+  async createCandidateProfile(userId: string, data: Partial<CandidateProfileData>): Promise<void> {
+    const { error } = await supabaseClient
+      .from('candidate_profiles')
+      .insert({
+        user_id: userId,
+        full_name: data.full_name || null,
+        phone: data.phone || null,
+        location: data.location || null,
+        skills: data.skills || []
+      });
+
+    if (error) {
+      throw new CustomError(ERROR_MESSAGES.SERVER_ERROR, HTTP_STATUS.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async createEmployerProfile(userId: string, data: Partial<EmployerProfileData>): Promise<void> {
+    const { error } = await supabaseClient
+      .from('employer_profiles')
+      .insert({
+        user_id: userId,
+        company_name: data.company_name!,
+        company_domain: data.company_domain!,
+        industry: data.industry || null,
+        website: data.website || null,
+        phone: data.phone || null
+      });
+
+    if (error) {
+      throw new CustomError(ERROR_MESSAGES.SERVER_ERROR, HTTP_STATUS.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async updateUser(id: string, data: Partial<UserModel>): Promise<UserModel> {
+    const { data: user, error } = await supabaseClient
+      .from('users')
+      .update(data)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      throw new CustomError(ERROR_MESSAGES.SERVER_ERROR, HTTP_STATUS.INTERNAL_SERVER_ERROR);
+    }
+
+    return user as UserModel;
   }
 }

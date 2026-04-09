@@ -4,6 +4,7 @@ import { Resolver } from './resolver';
 
 export class DependencyInjection {
   public static registerAll(): void {
+    Resolver.registerServices();
     RepositoryRegistry.registerRepositories();
     UseCaseRegistry.registerUseCases();
     Resolver.registerControllers();

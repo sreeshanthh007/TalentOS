@@ -1,13 +1,23 @@
-import { User } from '@modules/auth/models/user.model';
-import { AuthUserDTO } from '@modules/auth/dtos/auth.dto';
+import { UserModel } from '../models/user.model';
+import { LoginOutputDTO, TokenResponseDTO } from '../dtos/auth.dto';
 
 export class AuthMapper {
-  public static toResponseDTO(user: User): AuthUserDTO {
+  static toAuthResponse(user: UserModel, accessToken: string, refreshToken: string): LoginOutputDTO {
     return {
-      id: user.id,
-      email: user.email,
-      role: user.role,
-      createdAt: user.createdAt
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role
+      },
+      accessToken,
+      refreshToken
+    };
+  }
+
+  static toTokenResponse(accessToken: string, role: string): TokenResponseDTO {
+    return {
+      accessToken,
+      role
     };
   }
 }

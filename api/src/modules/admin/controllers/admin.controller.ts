@@ -1,3 +1,3 @@
-﻿export class AdminController {
+export class AdminController {
   constructor() {}
 }

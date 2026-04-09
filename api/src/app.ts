@@ -1,4 +1,5 @@
 import express, { Application } from 'express';
+import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import cors from 'cors';
 import compression from 'compression';
@@ -25,6 +26,7 @@ export class App {
     this.app.use(compression());
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
+    this.app.use(cookieParser());
 
     this.app.use(rateLimit({
       windowMs: 15 * 60 * 1000,
@@ -33,9 +35,6 @@ export class App {
   }
 
   private initRoutes(): void {
-    this.app.get('/health', (req, res) => {
-      res.status(HTTP_STATUS.OK).json({ status: 'OK' });
-    });
 
     this.app.use('/api/v1/auth', authRouter);
     // TODO: Mount other routers

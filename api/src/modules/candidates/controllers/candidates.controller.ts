@@ -1,3 +1,3 @@
-﻿export class CandidateController {
+export class CandidateController {
   constructor() {}
 }

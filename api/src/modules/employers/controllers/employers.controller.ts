@@ -1,3 +1,3 @@
-﻿export class EmployerController {
+export class EmployerController {
   constructor() {}
 }
