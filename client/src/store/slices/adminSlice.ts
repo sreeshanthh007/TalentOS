@@ -1,46 +1,30 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import {type  AdminUser } from '@/shared/types';
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
+import type { AdminUser } from '@/shared/types'
 
 interface AdminState {
-  user: AdminUser | null;
-  accessToken: string | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  error: string | null;
+  admin: AdminUser | null
+  isAuthenticated: boolean
 }
 
 const initialState: AdminState = {
-  user: null,
-  accessToken: null,
+  admin: null,
   isAuthenticated: false,
-  isLoading: false,
-  error: null,
-};
+}
 
 const adminSlice = createSlice({
   name: 'admin',
   initialState,
   reducers: {
-    loginAdmin(state, action: PayloadAction<{ user: AdminUser; accessToken: string }>) {
-      state.user = action.payload.user;
-      state.accessToken = action.payload.accessToken;
-      state.isAuthenticated = true;
-      state.error = null;
+    adminLogin: (state, action: PayloadAction<AdminUser>) => {
+      state.admin = action.payload
+      state.isAuthenticated = true
     },
-    logoutAdmin(state) {
-      Object.assign(state, initialState);
-    },
-    setAccessToken(state, action: PayloadAction<string>) {
-      state.accessToken = action.payload;
-    },
-    setLoading(state, action: PayloadAction<boolean>) {
-      state.isLoading = action.payload;
-    },
-    setError(state, action: PayloadAction<string | null>) {
-      state.error = action.payload;
+    adminLogout: (state) => {
+      state.admin = null
+      state.isAuthenticated = false
     },
   },
-});
+})
 
-export const { loginAdmin, logoutAdmin, setAccessToken, setLoading, setError } = adminSlice.actions;
-export default adminSlice.reducer;
+export const { adminLogin, adminLogout } = adminSlice.actions
+export default adminSlice.reducer

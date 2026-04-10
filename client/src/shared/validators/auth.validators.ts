@@ -1,39 +1,65 @@
-import * as Yup from 'yup';
-
-const invalidDomains = [
-  'gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 
-  'icloud.com', 'aol.com', 'protonmail.com'
-];
-
-export const candidateValidationSchema = Yup.object({
-  full_name: Yup.string().required('Full name is required'),
-  email: Yup.string().email('Invalid email address').required('Email is required'),
-  password: Yup.string().min(8, 'Password must be at least 8 characters').required('Password is required'),
-  phone: Yup.string(),
-  skills: Yup.array().of(Yup.string()),
-  location: Yup.string(),
-});
-
-export const employerValidationSchema = Yup.object().shape({
-  company_name: Yup.string().required('Company name is required'),
-  email: Yup.string()
-    .email('Invalid email address')
-    .required('Email is required')
-    .test('is-business-email', 'Please use your company email address', (value) => {
-      if (!value) return true;
-      const domain = value.split('@')[1];
-      return !invalidDomains.includes(domain?.toLowerCase() || '');
-    }),
-  password: Yup.string().min(8, 'Password must be at least 8 characters').required('Password is required'),
-  company_domain: Yup.string().required('Company domain is required'),
-  industry: Yup.string().required('Industry is required'),
-  website: Yup.string().url('Must be a valid URL'),
-  phone: Yup.string(),
-  selected_plan: Yup.string().oneOf(['free', 'premium', 'enterprise']).required(),
-});
+import * as Yup from 'yup'
 
 export const loginValidationSchema = Yup.object({
-  email: Yup.string().email('Invalid email address').required('Email is required'),
-  password: Yup.string().min(8, 'Password must be at least 8 characters').required('Password is required'),
-  role: Yup.string().oneOf(['candidate', 'employer', 'admin']).required(),
-});
+  email: Yup.string()
+    .email('Please enter a valid email address')
+    .required('This field is required'),
+  password: Yup.string()
+    .min(8, 'Password must be at least 8 characters')
+    .required('This field is required'),
+  role: Yup.string()
+    .oneOf(['candidate', 'employer', 'admin'])
+    .required('This field is required'),
+})
+
+export const candidateValidationSchema = Yup.object({
+  full_name: Yup.string().required('This field is required'),
+  email: Yup.string()
+    .email('Please enter a valid email address')
+    .required('This field is required'),
+  password: Yup.string()
+    .min(8, 'Password must be at least 8 characters')
+    .required('This field is required'),
+  phone: Yup.string()
+    .matches(/^[0-9]{10}$/, 'Phone number must be exactly 10 digits')
+    .required('This field is required'),
+  skills: Yup.array()
+    .of(Yup.string())
+    .min(1, 'Please select at least one skill')
+    .required('This field is required'),
+  location: Yup.string().required('This field is required'),
+})
+
+const invalidDomains = [
+  'gmail', 'yahoo', 'hotmail', 'outlook', 'icloud', 'aol',
+  'protonmail', 'ymail', 'live', 'msn', 'me', 'googlemail'
+]
+
+export const employerValidationSchema = Yup.object({
+  company_name: Yup.string().required('This field is required'),
+  email: Yup.string()
+    .email('Please enter a valid email address')
+    .required('This field is required')
+    .test('is-business-email', 'Please use your company email address', (value) => {
+      if (!value) return true
+      const domainParts = value.split('@')
+      if (domainParts.length < 2) return false
+      const domain = domainParts[1]?.split('.')[0]?.toLowerCase()
+      if (!domain) return false
+      return !invalidDomains.includes(domain)
+    }),
+  password: Yup.string()
+    .min(8, 'Password must be at least 8 characters')
+    .required('This field is required'),
+  company_domain: Yup.string().required('This field is required'),
+  industry: Yup.string().required('This field is required'),
+  website: Yup.string()
+    .url('Please enter a valid URL')
+    .optional(),
+  phone: Yup.string()
+    .matches(/^[0-9]{10}$/, 'Phone number must be exactly 10 digits')
+    .required('This field is required'),
+  selected_plan: Yup.string()
+    .oneOf(['free', 'premium', 'enterprise'])
+    .required('This field is required'),
+})

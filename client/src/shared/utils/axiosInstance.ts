@@ -1,128 +1,116 @@
-import axios, { AxiosError, type AxiosInstance, type InternalAxiosRequestConfig } from 'axios';
-import { store } from '@/store';
-import { logoutCandidate, setAccessToken as setCandidateToken } from '@/store/slices/candidateSlice';
-import { logoutEmployer, setAccessToken as setEmployerToken } from '@/store/slices/employerSlice';
-import { logoutAdmin, setAccessToken as setAdminToken } from '@/store/slices/adminSlice';
-import { toast } from 'sonner';
+import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios'
+import { toast } from 'sonner'
+import { store } from '@/store'
+import { adminLogout } from '@/store/slices/adminSlice'
+import { candidateLogout } from '@/store/slices/candidateSlice'
+import { employerLogout } from '@/store/slices/employerSlice'
+import { getSession, clearSession } from './session'
+import { type UserRole, type ApiResponse } from '../types'
 
-export const axiosInstance: AxiosInstance = axios.create({
+export const axiosInstance = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL,
   withCredentials: true,
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000',
-});
+})
 
-let isRefreshing = false;
-let refreshSubscribers: ((token?: string) => void)[] = [];
+let isRefreshing = false
+let refreshSubscribers: ((error: Error | null) => void)[] = []
 
-function onRefreshed(token?: string) {
-  refreshSubscribers.forEach((cb) => cb(token));
-  refreshSubscribers = [];
+function onRefreshed(error: Error | null) {
+  refreshSubscribers.forEach((callback) => callback(error))
+  refreshSubscribers = []   
 }
 
-function getRoleFromUrl(url?: string): 'candidate' | 'employer' | 'admin' | '' {
-  const part = url?.split('/')[3] || '';
-  return (['candidate', 'employer', 'admin'] as const).includes(part as never)
-    ? (part as 'candidate' | 'employer' | 'admin')
-    : '';
-}
-
-function handleLogout(role: string) {
-  localStorage.removeItem('talentos_session');
-  switch (role) {
-    case 'candidate':
-      store.dispatch(logoutCandidate());
-      break;
-    case 'employer':
-      store.dispatch(logoutEmployer());
-      break;
-    case 'admin':
-      store.dispatch(logoutAdmin());
-      break;
-    default:
-      window.location.href = '/';
+const handleLogout = (role: string | null) => {
+  clearSession()
+  if (role === 'candidate') {
+    store.dispatch(candidateLogout())
+  } else if (role === 'employer') {
+    store.dispatch(employerLogout())
+  } else if (role === 'admin') {
+    store.dispatch(adminLogout())
   }
 }
 
-axiosInstance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  const state = store.getState();
-  const sessionString = localStorage.getItem('talentos_session');
-  let role = '';
+function getRoleFromUrl(url?: string): UserRole | null {
+  if (!url) return null
+  const segment = url.split('/')[3]
+  if (segment === 'candidate') return 'candidate'
+  if (segment === 'employer') return 'employer'
+  if (segment === 'admin') return 'admin'
+  return null
+}
 
-  if (sessionString) {
-    try {
-      const session = JSON.parse(sessionString);
-      role = session.role;
-    } catch {
-      // Ignore
-    }
-  }
-
-  let token: string | null = null;
-  if (role === 'candidate') token = state.candidate.accessToken;
-  else if (role === 'employer') token = state.employer.accessToken;
-  else if (role === 'admin') token = state.admin.accessToken;
-
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-
-  return config;
-});
+interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
+  _retry?: boolean
+}
 
 axiosInstance.interceptors.response.use(
   (response) => response,
-  async (error: AxiosError<{ message: string }>) => {
-    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
-    const role = getRoleFromUrl(originalRequest?.url) || (() => {
-      try {
-        return JSON.parse(localStorage.getItem('talentos_session') || '{}').role || '';
-      } catch {
-        return '';
-      }
-    })();
+  async (error: AxiosError<ApiResponse<null>>) => {
+    const originalRequest = error.config as CustomAxiosRequestConfig
+    if (!originalRequest) return Promise.reject(error)
 
-    if (error.response?.status === 401 && !originalRequest._retry && originalRequest.url !== '/api/v1/auth/refresh-token') {
-      originalRequest._retry = true;
+    const session = getSession()
 
-      if (isRefreshing) {
-        return new Promise((resolve) => {
-          refreshSubscribers.push((token?: string) => {
-            if (token) {
-              originalRequest.headers.Authorization = `Bearer ${token}`;
-              resolve(axiosInstance(originalRequest));
-            } else {
-              resolve(Promise.reject(error));
-            }
-          });
-        });
+    // Assuming the URL format for api is /api/v1/userRole/... 
+    // Wait, the hook uses the original approach for URL sniffing
+    const roleFromUrl = getRoleFromUrl(originalRequest.url)
+    const role: UserRole | string | null = roleFromUrl || session?.role || null
+
+    const message = error.response?.data?.message || ''
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      const isRefreshTokenRequest = originalRequest.url?.includes('refresh-token')
+      
+      if (isRefreshTokenRequest) {
+        clearSession()
+        handleLogout(role)
+        toast.info(message || 'Session expired, please log in again')
+        return Promise.reject(error)
       }
 
-      isRefreshing = true;
+      originalRequest._retry = true
 
-      try {
-        const { data } = await axiosInstance.post('/api/v1/auth/refresh-token', { role });
-        const newToken = data.data.accessToken;
+      if (!isRefreshing) {
+        isRefreshing = true
 
-        if (role === 'candidate') store.dispatch(setCandidateToken(newToken));
-        else if (role === 'employer') store.dispatch(setEmployerToken(newToken));
-        else if (role === 'admin') store.dispatch(setAdminToken(newToken));
-
-        onRefreshed(newToken);
-        originalRequest.headers.Authorization = `Bearer ${newToken}`;
-        return axiosInstance(originalRequest);
-      } catch (err) {
-        onRefreshed();
-        handleLogout(role);
-        return Promise.reject(err);
-      } finally {
-        isRefreshing = false;
+        try {
+          const authRole = roleFromUrl || session?.role || ''
+          await axiosInstance.post('/api/v1/auth/refresh-token', authRole ? { role: authRole } : undefined)
+          
+          isRefreshing = false
+          onRefreshed(null)
+          return axiosInstance(originalRequest)
+        } catch (refreshError) {
+          isRefreshing = false
+          clearSession()
+          handleLogout(role)
+          onRefreshed(refreshError as Error)
+          return Promise.reject(refreshError)
+        }
       }
-    } else if (error.response?.status === 401 && originalRequest.url === '/api/v1/auth/refresh-token') {
-      handleLogout(role);
-    } else if (error.response?.status === 403) {
-      toast.info('Access denied or blocked.');
-      handleLogout(role);
+
+      return new Promise((resolve, reject) => {
+        refreshSubscribers.push((err: Error | null) => {
+          if (err) {
+            reject(err)
+          } else {
+            resolve(axiosInstance(originalRequest))
+          }
+        })
+      })
     }
 
-    return Promise.reject(error);
+    if (
+      error.response?.status === 403 &&
+      (message.includes('blocked') || message.includes('blacklisted'))
+    ) {
+      clearSession()
+      handleLogout(role)
+      toast.info(message || 'Access denied')
+      return Promise.reject(error)
+    }
+
+    return Promise.reject(error)
   }
-);
+)

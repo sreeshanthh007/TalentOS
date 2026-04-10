@@ -4,6 +4,7 @@ dotenv.config();
 export const config = {
   PORT: Number(process.env.PORT),
   NODE_ENV: process.env.NODE_ENV,
+  CLIENT_URL: process.env.CLIENT_URL,
   SALTROUNDS: Number(process.env.SALTROUNDS!),
   JWT_ACCESS_SECRET: process.env.JWT_ACCESS_SECRET!,
   JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET!,

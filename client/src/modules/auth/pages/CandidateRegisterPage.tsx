@@ -1,69 +1,78 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Formik, Form, Field, ErrorMessage, type FormikProps } from 'formik';
+import React from 'react';
+import { AnimatePresence } from 'framer-motion';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAppDispatch } from '@/store/hooks';
-import { loginCandidate } from '@/store/slices/candidateSlice';
-import { AuthService } from '@/modules/auth/services/auth.service';
+import { candidateLogin } from '@/store/slices/candidateSlice';
+import { useRegisterCandidate } from '@/modules/auth/hooks/useRegisterCandidate';
+import { useLogin } from '@/modules/auth/hooks/useLogin';
 import { useToast } from '@/shared/hooks/useToast';
-import type { CandidateRegisterValues } from '@/shared/types';
+import { getErrorMessage } from '@/shared/utils/getErrorMessage';
+import type { CandidateRegisterValues, CandidateUser } from '@/shared/types';
 import { ROUTES } from '@/shared/constants/routes.constants';
 import { candidateValidationSchema } from '@/shared/validators/auth.validators';
-import { pageVariants, stepVariants } from '@/shared/animations/auth.animations';
+import { pageVariants } from '@/shared/animations/auth.animations';
 import { MultiStepProgress } from '@/modules/auth/components/MultiStepProgress';
-import { handleNextStep } from '@/modules/auth/utils/form.utils';
 import { skillsList } from '@/modules/auth/constants/auth.constants';
+import { setSession } from '@/shared/utils/session';
+import { useMultiStepForm } from '@/modules/auth/hooks/useMultiStepForm';
+import { FormNavigation } from '@/modules/auth/components/FormNavigation';
+import { StepWrapper } from '@/modules/auth/components/StepWrapper';
+import { motion } from 'framer-motion';
 
+import { Eye, EyeOff } from 'lucide-react';
 
 const CandidateRegisterPage: React.FC = () => {
-  const [step, setStep] = useState(0);
-  const [direction, setDirection] = useState(1);
+  const [showPassword, setShowPassword] = React.useState(false);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const toast = useToast();
 
-  const handleNext = async (formik: FormikProps<CandidateRegisterValues>) => {
-    let fieldsToValidate: string[] = [];
-    if (step === 0) fieldsToValidate = ['full_name', 'email', 'password', 'phone'];
-    if (step === 1) fieldsToValidate = ['skills', 'location'];
+  const {
+    step,
+    direction,
+    handleNext,
+    handleBack,
+    isLastStep
+  } = useMultiStepForm<CandidateRegisterValues>({
+    totalSteps: 3,
+    getFieldsToValidate: (s) => {
+      if (s === 0) return ['full_name', 'email', 'password', 'phone'];
+      if (s === 1) return ['skills', 'location'];
+      return [];
+    }
+  });
 
-    await handleNextStep(formik, fieldsToValidate, () => {
-      setDirection(1);
-      setStep((prev) => prev + 1);
+  const { mutate: register, isPending: isRegistering } = useRegisterCandidate();
+  const { mutate: login, isPending: isLoggingIn } = useLogin();
+
+  const onSubmit = (values: CandidateRegisterValues) => {
+    if (!isLastStep) return;
+
+    register(values, {
+      onSuccess: () => {
+        login({
+          email: values.email,
+          password: values.password,
+          role: 'candidate',
+        }, {
+          onSuccess: (loginResponse) => {
+            const { user } = loginResponse.data;
+            setSession('candidate');
+            dispatch(candidateLogin(user as CandidateUser));
+            toast.success(loginResponse.message);
+            navigate(ROUTES.CANDIDATE.DASHBOARD);
+          },
+          onError: (error: unknown) => {
+            toast.error(getErrorMessage(error));
+          },
+        });
+      },
+      onError: (error: unknown) => {
+        toast.error(getErrorMessage(error));
+      },
     });
   };
-
-  const handleBack = () => {
-    setDirection(-1);
-    setStep((prev) => prev - 1);
-  };
-
-  const onSubmit = async (values: CandidateRegisterValues, { setSubmitting }: any) => {
-    try {
-      await AuthService.registerCandidate(values);
-      
-      const loginResponse = await AuthService.login({
-        email: values.email,
-        password: values.password,
-        role: 'candidate',
-      });
-      
-      localStorage.setItem('talentos_session', JSON.stringify({ role: 'candidate' }));
-      dispatch(loginCandidate({
-        user: loginResponse.data.data.user,
-        accessToken: loginResponse.data.data.accessToken
-      }));
-      
-      toast.success('Registration successful!');
-      navigate(ROUTES.CANDIDATE.DASHBOARD);
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Registration failed');
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-
 
   return (
     <div className="min-h-screen bg-[#0a2329] text-white flex flex-col items-center justify-center p-4">
@@ -95,18 +104,15 @@ const CandidateRegisterPage: React.FC = () => {
           validateOnMount
         >
           {(formik) => (
-            <Form className="flex flex-col gap-6 overflow-hidden">
+            <Form 
+              className="flex flex-col gap-6 overflow-hidden"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') e.preventDefault();
+              }}
+            >
               <AnimatePresence mode="wait" custom={direction}>
                 {step === 0 && (
-                  <motion.div
-                    key="step0"
-                    custom={direction}
-                    variants={stepVariants}
-                    initial="initial"
-                    animate="animate"
-                    exit="exit"
-                    className="flex flex-col gap-4"
-                  >
+                  <StepWrapper direction={direction} stepKey="step0" className="flex flex-col gap-4">
                     <div>
                       <Field name="full_name" className="w-full p-3 rounded-lg bg-[#0a2329] border border-teal-900/50 focus:border-teal-500 focus:outline-none" placeholder="Full Name *" />
                       <ErrorMessage name="full_name" component="div" className="text-red-400 text-sm mt-1" />
@@ -115,29 +121,35 @@ const CandidateRegisterPage: React.FC = () => {
                       <Field name="email" type="email" className="w-full p-3 rounded-lg bg-[#0a2329] border border-teal-900/50 focus:border-teal-500 focus:outline-none" placeholder="Email *" />
                       <ErrorMessage name="email" component="div" className="text-red-400 text-sm mt-1" />
                     </div>
-                    <div>
-                      <Field name="password" type="password" className="w-full p-3 rounded-lg bg-[#0a2329] border border-teal-900/50 focus:border-teal-500 focus:outline-none" placeholder="Password *" />
+                    <div className="relative">
+                      <Field 
+                        name="password" 
+                        type={showPassword ? "text" : "password"} 
+                        className="w-full p-3 rounded-lg bg-[#0a2329] border border-teal-900/50 focus:border-teal-500 focus:outline-none pr-10" 
+                        placeholder="Password *" 
+                      />
+                      <button 
+                        type="button" 
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-3.5 text-gray-400 hover:text-white"
+                      >
+                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
                       <ErrorMessage name="password" component="div" className="text-red-400 text-sm mt-1" />
                     </div>
                     <div>
-                      <Field name="phone" className="w-full p-3 rounded-lg bg-[#0a2329] border border-teal-900/50 focus:border-teal-500 focus:outline-none" placeholder="Phone (Optional)" />
+                      <Field name="phone" className="w-full p-3 rounded-lg bg-[#0a2329] border border-teal-900/50 focus:border-teal-500 focus:outline-none" placeholder="Phone Number *" />
+                      <ErrorMessage name="phone" component="div" className="text-red-400 text-sm mt-1" />
                     </div>
-                  </motion.div>
+                  </StepWrapper>
                 )}
 
                 {step === 1 && (
-                  <motion.div
-                    key="step1"
-                    custom={direction}
-                    variants={stepVariants}
-                    initial="initial"
-                    animate="animate"
-                    exit="exit"
-                    className="flex flex-col gap-6"
-                  >
+                  <StepWrapper direction={direction} stepKey="step1">
                     <div>
                       <h3 className="text-lg mb-3">Location</h3>
-                      <Field name="location" className="w-full p-3 rounded-lg bg-[#0a2329] border border-teal-900/50 focus:border-teal-500 focus:outline-none" placeholder="City, Country" />
+                      <Field name="location" className="w-full p-3 rounded-lg bg-[#0a2329] border border-teal-900/50 focus:border-teal-500 focus:outline-none" placeholder="City, Country *" />
+                      <ErrorMessage name="location" component="div" className="text-red-400 text-sm mt-1" />
                     </div>
                     <div>
                       <h3 className="text-lg mb-3">Skills</h3>
@@ -149,64 +161,31 @@ const CandidateRegisterPage: React.FC = () => {
                           </label>
                         ))}
                       </div>
+                      <ErrorMessage name="skills" component="div" className="text-red-400 text-sm mt-1" />
                     </div>
-                  </motion.div>
+                  </StepWrapper>
                 )}
 
                 {step === 2 && (
-                  <motion.div
-                    key="step2"
-                    custom={direction}
-                    variants={stepVariants}
-                    initial="initial"
-                    animate="animate"
-                    exit="exit"
-                    className="flex flex-col gap-4 text-gray-300"
-                  >
+                  <StepWrapper direction={direction} stepKey="step2" className="flex flex-col gap-4 text-gray-300">
                     <h3 className="text-xl text-teal-400 mb-2">Review Details</h3>
                     <p><strong>Name:</strong> {formik.values.full_name}</p>
                     <p><strong>Email:</strong> {formik.values.email}</p>
                     <p><strong>Location:</strong> {formik.values.location || 'N/A'}</p>
                     <p><strong>Skills:</strong> {formik.values.skills.join(', ') || 'None'}</p>
-                  </motion.div>
+                  </StepWrapper>
                 )}
               </AnimatePresence>
 
-              <div className="flex justify-between mt-4">
-                {step > 0 ? (
-                  <motion.button
-                    type="button"
-                    onClick={handleBack}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="px-6 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 font-medium"
-                  >
-                    Back
-                  </motion.button>
-                ) : <div />}
-
-                {step < 2 ? (
-                  <motion.button
-                    type="button"
-                    onClick={() => handleNext(formik)}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="px-6 py-2 rounded-lg bg-teal-500 hover:bg-teal-400 text-slate-900 font-bold ml-auto"
-                  >
-                    Next
-                  </motion.button>
-                ) : (
-                  <motion.button
-                    type="submit"
-                    disabled={formik.isSubmitting}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="px-6 py-2 rounded-lg bg-teal-500 hover:bg-teal-400 text-slate-900 font-bold ml-auto disabled:opacity-50"
-                  >
-                    {formik.isSubmitting ? 'Submitting...' : 'Submit'}
-                  </motion.button>
-                )}
-              </div>
+              <FormNavigation
+                step={step}
+                totalSteps={3}
+                onBack={handleBack}
+                onNext={() => handleNext(formik)}
+                onSubmit={formik.handleSubmit}
+                isSubmitting={formik.isSubmitting}
+                isLoading={isRegistering || isLoggingIn}
+              />
             </Form>
           )}
         </Formik>

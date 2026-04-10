@@ -1,18 +1,19 @@
-import { type FormikProps } from 'formik';
+import { type FormikProps } from 'formik'
 
-export const handleNextStep = async <T,>(
+export async function handleNextStep<T>(
   formik: FormikProps<T>,
   fieldsToValidate: string[],
   onSuccess: () => void
-) => {
-  const errors = await formik.validateForm();
-  const hasError = fieldsToValidate.some((field) => errors[field as keyof typeof errors]);
+): Promise<void> {
+  const errors = await formik.validateForm()
+  
+  const hasErrors = fieldsToValidate.some((field) => !!errors[field as keyof typeof errors])
+  
+  fieldsToValidate.forEach((field) => {
+    formik.setFieldTouched(field, true, false)
+  })
 
-  formik.setTouched(
-    fieldsToValidate.reduce((acc, field) => ({ ...acc, [field]: true }), {})
-  );
-
-  if (!hasError) {
-    onSuccess();
+  if (!hasErrors) {
+    onSuccess()
   }
-};
+}

@@ -1,18 +1,20 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Formik, Form, Field, ErrorMessage } from 'formik';
+import { Formik, Form, Field, ErrorMessage, type FormikHelpers } from 'formik';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAppDispatch } from '@/store/hooks';
-import { loginCandidate } from '@/store/slices/candidateSlice';
-import { loginEmployer } from '@/store/slices/employerSlice';
-import { loginAdmin } from '@/store/slices/adminSlice';
-import { AuthService } from '@/modules/auth/services/auth.service';
+import { candidateLogin } from '@/store/slices/candidateSlice';
+import { employerLogin } from '@/store/slices/employerSlice';
+import { adminLogin } from '@/store/slices/adminSlice';
+import { useLogin } from '@/modules/auth/hooks/useLogin';
 import { useToast } from '@/shared/hooks/useToast';
-import type { LoginValues } from '@/shared/types';
+import { getErrorMessage } from '@/shared/utils/getErrorMessage';
+import type { LoginValues, CandidateUser, EmployerUser, AdminUser } from '@/shared/types';
 import { ROUTES } from '@/shared/constants/routes.constants';
 import { Eye, EyeOff } from 'lucide-react';
 import { loginValidationSchema } from '@/shared/validators/auth.validators';
 import { pageVariants } from '@/shared/animations/auth.animations';
+import { setSession } from '@/shared/utils/session';
 
 const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -20,30 +22,32 @@ const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const toast = useToast();
 
-  const onSubmit = async (values: LoginValues, { setSubmitting }: any) => {
-    try {
-      const response = await AuthService.login(values);
-      const { user, accessToken } = response.data.data;
+  const { mutate: login, isPending } = useLogin();
 
-      localStorage.setItem('talentos_session', JSON.stringify({ role: values.role }));
+  const onSubmit = (values: LoginValues, { setSubmitting }: FormikHelpers<LoginValues>) => {
+    login(values, {
+      onSuccess: (response) => {
+        const { user } = response.data;
+        setSession(values.role);
 
-      if (values.role === 'candidate') {
-        dispatch(loginCandidate({ user, accessToken }));
-        navigate(ROUTES.CANDIDATE.DASHBOARD);
-      } else if (values.role === 'employer') {
-        dispatch(loginEmployer({ user, accessToken }));
-        navigate(ROUTES.EMPLOYER.DASHBOARD);
-      } else if (values.role === 'admin') {
-        dispatch(loginAdmin({ user, accessToken }));
-        navigate(ROUTES.ADMIN.DASHBOARD);
-      }
-      
-      toast.success('Successfully logged in');
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Login failed');
-    } finally {
-      setSubmitting(false);
-    }
+        if (values.role === 'candidate') {
+          dispatch(candidateLogin(user as CandidateUser));
+          navigate(ROUTES.CANDIDATE.DASHBOARD);
+        } else if (values.role === 'employer') {
+          dispatch(employerLogin(user as EmployerUser));
+          navigate(ROUTES.EMPLOYER.DASHBOARD);
+        } else if (values.role === 'admin') {
+          dispatch(adminLogin(user as AdminUser));
+          navigate(ROUTES.ADMIN.DASHBOARD);
+        }
+        
+        toast.success(response.message);
+      },
+      onError: (error: unknown) => {
+        toast.error(getErrorMessage(error));
+      },
+      onSettled: () => setSubmitting(false),
+    });
   };
 
   return (
@@ -67,6 +71,7 @@ const LoginPage: React.FC = () => {
           initialValues={{ email: '', password: '', role: 'candidate' } as LoginValues}
           validationSchema={loginValidationSchema}
           onSubmit={onSubmit}
+          validateOnMount
         >
           {({ isSubmitting, values, setFieldValue }) => (
             <Form className="flex flex-col gap-6">
@@ -109,12 +114,12 @@ const LoginPage: React.FC = () => {
 
               <motion.button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || isPending}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 className="w-full py-3 rounded-lg bg-teal-500 hover:bg-teal-400 text-slate-900 font-bold disabled:opacity-50 mt-2"
               >
-                {isSubmitting ? 'Logging in...' : 'Log In'}
+                {isSubmitting || isPending ? 'Logging in...' : 'Log In'}
               </motion.button>
               
               <div className="mt-4 text-center text-sm text-gray-400">
