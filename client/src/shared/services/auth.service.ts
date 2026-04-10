@@ -1,4 +1,5 @@
 import { axiosInstance } from '@/shared/utils/axiosInstance'
+import { API_ENDPOINTS } from '@/shared/constants/api.routes'
 import type {
   LoginValues,
   CandidateRegisterValues,
@@ -7,32 +8,29 @@ import type {
   TokenResponseData,
 } from '@/shared/types'
 
-
 interface ApiResponse<T> {
   success: boolean
   message: string
   data: T
 }
 
-
-
 export const loginApi = async (
   values: LoginValues
 ): Promise<ApiResponse<AuthResponseData>> =>
-  axiosInstance.post('/auth/login', values).then((res) => res.data)
+  axiosInstance.post(API_ENDPOINTS.AUTH.LOGIN, values).then((res) => res.data)
 
 export const registerCandidateApi = async (
   values: CandidateRegisterValues
 ): Promise<ApiResponse<AuthResponseData>> =>
-  axiosInstance.post('/auth/register/candidate', values).then((res) => res.data)
+  axiosInstance.post(API_ENDPOINTS.AUTH.REGISTER_CANDIDATE, values).then((res) => res.data)
 
 export const registerEmployerApi = async (
   values: EmployerRegisterValues
 ): Promise<ApiResponse<AuthResponseData>> =>
-  axiosInstance.post('/auth/register/employer', values).then((res) => res.data)
+  axiosInstance.post(API_ENDPOINTS.AUTH.REGISTER_EMPLOYER, values).then((res) => res.data)
 
 export const logoutApi = async (): Promise<ApiResponse<null>> =>
-  axiosInstance.post('/auth/logout').then((res) => res.data)
+  axiosInstance.post(API_ENDPOINTS.AUTH.LOGOUT).then((res) => res.data)
 
-export const refreshTokenApi = async (): Promise<ApiResponse<TokenResponseData>> =>
-  axiosInstance.post('/auth/refresh-token').then((res) => res.data)
+export const refreshTokenApi = async (role?: string): Promise<ApiResponse<TokenResponseData>> =>
+  axiosInstance.post(API_ENDPOINTS.AUTH.REFRESH_TOKEN, role ? { role } : undefined).then((res) => res.data)

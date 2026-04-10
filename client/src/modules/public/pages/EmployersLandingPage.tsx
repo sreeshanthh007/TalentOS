@@ -1,21 +1,21 @@
-import React, { useRef } from 'react'
+import { useRef } from 'react'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import { Formik, Form, Field, ErrorMessage } from 'formik'
-import * as Yup from 'yup'
-import { Users, CheckCircle, Zap, Globe } from 'lucide-react'
+import { Users, Zap, Globe } from 'lucide-react'
 import { PricingCard } from '../components/PricingCard'
-import { useCreateInquiry } from '../hooks/useCreateInquiry'
-import { useToast } from '@/shared/hooks/useToast'
 import { ROUTES } from '@/shared/constants/routes.constants'
 import { pageVariants, staggerContainer, staggerItem } from '@/shared/animations/auth.animations'
-import type { ContactInquiryPayload } from '@/shared/types'
+import { ContactInquiryForm } from '../components/ContactInquiryForm'
 
 const MOCK_PLANS = [
   { id: 'free' as const, display_name: 'Starter', price_monthly: 0, job_listing_limit: 3, features: ['3 Active Job Listings', 'Basic Candidate Matching', 'Community Support'] },
   { id: 'premium' as const, display_name: 'Growth', price_monthly: 199, job_listing_limit: 20, features: ['20 Active Job Listings', 'Advanced AI Matching pipeline', 'Priority Email Support', 'Custom Company Profile'] },
   { id: 'enterprise' as const, display_name: 'Enterprise', price_monthly: 899, job_listing_limit: -1, features: ['Unlimited Job Listings', 'ATS Integrations', 'Dedicated Account Manager', 'White-labeled portal'] },
 ]
+
+import { useCreateInquiry } from '../hooks/useCreateInquiry'
+import { useToast } from '@/shared/hooks/useToast'
+import type { ContactInquiryPayload } from '@/shared/types'
 
 export default function EmployersLandingPage() {
   const contactFormRef = useRef<HTMLDivElement>(null)
@@ -27,22 +27,11 @@ export default function EmployersLandingPage() {
     // In a full implementation, we'd pass the planId to the form state
   }
 
-  const inquirySchema = Yup.object().shape({
-    company_name: Yup.string().required('Company name is required'),
-    email: Yup.string().email('Invalid email').test('is-work-email', 'Please use a work email (no gmail/yahoo)', val => {
-      if (!val) return false
-      return !val.match(/@(gmail|yahoo|hotmail|outlook)\./)
-    }).required('Work email is required'),
-    phone: Yup.string().required('Phone is required'),
-    plan_interested: Yup.string().required('Required'),
-    message: Yup.string().required('Message is required'),
-  })
-
-  const onSubmit = (values: ContactInquiryPayload, { resetForm }: any) => {
+  const handleInquirySubmit = (values: ContactInquiryPayload, helpers: any) => {
     createInquiry(values, {
       onSuccess: () => {
         toast.success("Inquiry sent successfully! Our team will contact you soon.")
-        resetForm()
+        helpers.resetForm()
       },
       onError: () => toast.error("Failed to send inquiry. Please try again.")
     })
@@ -178,60 +167,7 @@ export default function EmployersLandingPage() {
             <p className="text-gray-400">Tell us about your hiring needs and we'll craft a custom solution.</p>
           </div>
 
-          <Formik
-            initialValues={{ company_name: '', email: '', phone: '', plan_interested: 'premium', message: '' } as ContactInquiryPayload}
-            validationSchema={inquirySchema}
-            onSubmit={onSubmit}
-          >
-            {({ isSubmitting }) => (
-              <Form className="flex flex-col gap-6 relative z-10">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-2">Company Name</label>
-                    <Field name="company_name" className="w-full bg-[#0a2329] border border-teal-900/50 rounded-xl p-3 text-white focus:border-teal-500 outline-none" />
-                    <ErrorMessage name="company_name" component="div" className="text-coral text-xs mt-1" />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-2">Work Email</label>
-                    <Field type="email" name="email" className="w-full bg-[#0a2329] border border-teal-900/50 rounded-xl p-3 text-white focus:border-teal-500 outline-none" />
-                    <ErrorMessage name="email" component="div" className="text-[#FF6B6B] text-xs mt-1" />
-                  </div>
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-2">Phone Number</label>
-                    <Field name="phone" className="w-full bg-[#0a2329] border border-teal-900/50 rounded-xl p-3 text-white focus:border-teal-500 outline-none" />
-                    <ErrorMessage name="phone" component="div" className="text-[#FF6B6B] text-xs mt-1" />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-2">Plan Interested</label>
-                    <Field as="select" name="plan_interested" className="w-full bg-[#0a2329] border border-teal-900/50 rounded-xl p-3 text-white focus:border-teal-500 outline-none hover:cursor-pointer">
-                      <option value="free">Free Starter</option>
-                      <option value="premium">Premium Growth</option>
-                      <option value="enterprise">Enterprise</option>
-                    </Field>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm text-gray-400 mb-2">Message</label>
-                  <Field as="textarea" rows={4} name="message" className="w-full bg-[#0a2329] border border-teal-900/50 rounded-xl p-3 text-white focus:border-teal-500 outline-none" placeholder="Tell us about your hiring volume and goals..." />
-                  <ErrorMessage name="message" component="div" className="text-[#FF6B6B] text-xs mt-1" />
-                </div>
-
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  type="submit"
-                  disabled={isSubmitting || isPending}
-                  className="w-full bg-teal-500 hover:bg-teal-400 text-slate-900 font-bold py-4 rounded-xl mt-4 disabled:opacity-50"
-                >
-                  {isSubmitting || isPending ? 'Sending...' : 'Send Inquiry'}
-                </motion.button>
-              </Form>
-            )}
-          </Formik>
+          <ContactInquiryForm onSubmit={handleInquirySubmit} isLoading={isPending} />
         </div>
       </section>
 

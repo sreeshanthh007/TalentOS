@@ -6,6 +6,7 @@ import { candidateLogout } from '@/store/slices/candidateSlice'
 import { employerLogout } from '@/store/slices/employerSlice'
 import { getSession, clearSession } from './session'
 import { type UserRole, type ApiResponse } from '../types'
+import { API_ENDPOINTS } from '../constants/api.routes'
 
 export const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -60,7 +61,7 @@ axiosInstance.interceptors.response.use(
     const message = error.response?.data?.message || ''
 
     if (error.response?.status === 401 && !originalRequest._retry) {
-      const isRefreshTokenRequest = originalRequest.url?.includes('refresh-token')
+      const isRefreshTokenRequest = originalRequest.url?.includes(API_ENDPOINTS.AUTH.REFRESH_TOKEN)
       
       if (isRefreshTokenRequest) {
         clearSession()
@@ -68,15 +69,15 @@ axiosInstance.interceptors.response.use(
         toast.info(message || 'Session expired, please log in again')
         return Promise.reject(error)
       }
-
+ 
       originalRequest._retry = true
-
+ 
       if (!isRefreshing) {
         isRefreshing = true
-
+ 
         try {
           const authRole = roleFromUrl || session?.role || ''
-          await axiosInstance.post('/api/v1/auth/refresh-token', authRole ? { role: authRole } : undefined)
+          await axiosInstance.post(API_ENDPOINTS.AUTH.REFRESH_TOKEN, authRole ? { role: authRole } : undefined)
           
           isRefreshing = false
           onRefreshed(null)
