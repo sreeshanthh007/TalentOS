@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query'
-import { logoutApi } from '../services/auth.service'
+import { logoutApi } from '@/shared/services/auth.service'
 import { useAppDispatch } from '@/store/hooks'
 import { candidateLogout } from '@/store/slices/candidateSlice'
 import { employerLogout } from '@/store/slices/employerSlice'
@@ -14,6 +14,7 @@ export function useLogout() {
 
   return useMutation({
     mutationFn: logoutApi,
+    retry: 0,
     onSuccess: () => {
       const session = getSession()
       if (session) {
