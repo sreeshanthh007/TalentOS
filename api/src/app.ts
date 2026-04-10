@@ -3,12 +3,14 @@ import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import cors from 'cors';
 import compression from 'compression';
+import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import { ErrorMiddleware } from '@shared/middlewares/error.middleware';
 import { authRouter } from '@modules/auth/routes/auth.routes';
-import { HTTP_STATUS } from '@shared/constants/statusCodes.constants';
+
 
 import { logger } from '@shared/utils/logger';
+import { config } from '@shared/config/env.config';
 
 export class App {
   public app: Application;
@@ -22,7 +24,13 @@ export class App {
 
   private initMiddlewares(): void {
     this.app.use(helmet());
-    this.app.use(cors());
+    this.app.use(morgan('dev'));
+
+    this.app.use(cors({
+      origin: config.CLIENT_URL,
+      credentials: true
+    }));
+
     this.app.use(compression());
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
@@ -35,9 +43,7 @@ export class App {
   }
 
   private initRoutes(): void {
-
     this.app.use('/api/v1/auth', authRouter);
-    // TODO: Mount other routers
   }
 
   private initErrorHandler(): void {

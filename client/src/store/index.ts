@@ -1,7 +1,7 @@
-import { configureStore } from '@reduxjs/toolkit';
-import candidateReducer from '@/store/slices/candidateSlice';
-import employerReducer from '@/store/slices/employerSlice';
-import adminReducer from '@/store/slices/adminSlice';
+import { configureStore } from '@reduxjs/toolkit'
+import candidateReducer from './slices/candidateSlice'
+import employerReducer from './slices/employerSlice'
+import adminReducer from './slices/adminSlice'
 
 export const store = configureStore({
   reducer: {
@@ -9,7 +9,7 @@ export const store = configureStore({
     employer: employerReducer,
     admin: adminReducer,
   },
-});
+})
 
-export type RootState = ReturnType<typeof store.getState>;
-export type AppDispatch = typeof store.dispatch;
+export type RootState = ReturnType<typeof store.getState>
+export type AppDispatch = typeof store.dispatch

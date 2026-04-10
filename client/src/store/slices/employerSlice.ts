@@ -1,46 +1,30 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import type { EmployerUser } from '@/shared/types';
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
+import type { EmployerUser } from '@/shared/types'
 
 interface EmployerState {
-  user: EmployerUser | null;
-  accessToken: string | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  error: string | null;
+  employer: EmployerUser | null
+  isAuthenticated: boolean
 }
 
 const initialState: EmployerState = {
-  user: null,
-  accessToken: null,
+  employer: null,
   isAuthenticated: false,
-  isLoading: false,
-  error: null,
-};
+}
 
 const employerSlice = createSlice({
   name: 'employer',
   initialState,
   reducers: {
-    loginEmployer(state, action: PayloadAction<{ user: EmployerUser; accessToken: string }>) {
-      state.user = action.payload.user;
-      state.accessToken = action.payload.accessToken;
-      state.isAuthenticated = true;
-      state.error = null;
+    employerLogin: (state, action: PayloadAction<EmployerUser>) => {
+      state.employer = action.payload
+      state.isAuthenticated = true
     },
-    logoutEmployer(state) {
-      Object.assign(state, initialState);
-    },
-    setAccessToken(state, action: PayloadAction<string>) {
-      state.accessToken = action.payload;
-    },
-    setLoading(state, action: PayloadAction<boolean>) {
-      state.isLoading = action.payload;
-    },
-    setError(state, action: PayloadAction<string | null>) {
-      state.error = action.payload;
+    employerLogout: (state) => {
+      state.employer = null
+      state.isAuthenticated = false
     },
   },
-});
+})
 
-export const { loginEmployer, logoutEmployer, setAccessToken, setLoading, setError } = employerSlice.actions;
-export default employerSlice.reducer;
+export const { employerLogin, employerLogout } = employerSlice.actions
+export default employerSlice.reducer

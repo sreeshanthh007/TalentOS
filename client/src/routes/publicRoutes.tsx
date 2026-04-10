@@ -20,10 +20,10 @@ const PublicRoutes = () => {
       <Routes>
         <Route element={<PublicLayout />}>
           <Route path={ROUTES.HOME} element={<PageTransition><HomePage /></PageTransition>} />
-          <Route path={ROUTES.ABOUT} element={<PageTransition><AboutPage /></PageTransition>} />
-          <Route path={ROUTES.JOBS.LIST} element={<PageTransition><JobListingsPage /></PageTransition>} />
-          <Route path="/jobs/:id" element={<PageTransition><JobDetailPage /></PageTransition>} />
-          <Route path="/employers/landing" element={<PageTransition><EmployersLandingPage /></PageTransition>} />
+          <Route path={ROUTES.PUBLIC.ABOUT} element={<PageTransition><AboutPage /></PageTransition>} />
+          <Route path={ROUTES.PUBLIC.JOBS} element={<PageTransition><JobListingsPage /></PageTransition>} />
+          <Route path={ROUTES.PUBLIC.JOB_DETAIL} element={<PageTransition><JobDetailPage /></PageTransition>} />
+          <Route path={ROUTES.PUBLIC.EMPLOYERS} element={<PageTransition><EmployersLandingPage /></PageTransition>} />
           <Route path={ROUTES.AUTH.LOGIN} element={<PageTransition><LoginPage /></PageTransition>} />
           <Route path={ROUTES.AUTH.REGISTER_CANDIDATE} element={<PageTransition><CandidateRegisterPage /></PageTransition>} />
           <Route path={ROUTES.AUTH.REGISTER_EMPLOYER} element={<PageTransition><EmployerRegisterPage /></PageTransition>} />

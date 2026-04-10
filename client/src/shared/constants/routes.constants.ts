@@ -1,29 +1,34 @@
 export const ROUTES = {
   HOME: '/',
-  ABOUT: '/about',
   AUTH: {
-    LOGIN: '/auth/login',
-    REGISTER_CANDIDATE: '/auth/register/candidate',
-    REGISTER_EMPLOYER: '/auth/register/employer'
-  },
-  JOBS: {
-    LIST: '/jobs',
-    DETAILS: (id: string) => `/jobs/${id}`
+    LOGIN: '/login',
+    REGISTER_CANDIDATE: '/register/candidate',
+    REGISTER_EMPLOYER: '/register/employer',
   },
   CANDIDATE: {
     DASHBOARD: '/candidate/dashboard',
     PROFILE: '/candidate/profile',
-    RESUME_BUILDER: '/candidate/resume-builder'
+    RESUME_BUILDER: '/candidate/resume-builder',
+    APPLIED_JOBS: '/candidate/applied-jobs',
   },
   EMPLOYER: {
     DASHBOARD: '/employer/dashboard',
-    JOB_MANAGEMENT: '/employer/jobs',
-    APPLICANT_PIPELINE: '/employer/applicants'
+    JOBS: '/employer/jobs',
+    APPLICANTS: '/employer/applicants',
+    PROFILE: '/employer/profile',
+    SUBSCRIPTION: '/employer/subscription',
   },
   ADMIN: {
     DASHBOARD: '/admin/dashboard',
     EMPLOYERS: '/admin/employers',
     CANDIDATES: '/admin/candidates',
-    PLANS: '/admin/plans'
+    PLANS: '/admin/plans',
+    INQUIRIES: '/admin/inquiries',
+  },
+  PUBLIC: {
+    JOBS: '/jobs',
+    JOB_DETAIL: '/jobs/:id',
+    EMPLOYERS: '/employers',
+    ABOUT: '/about',
   }
-} as const;
+}

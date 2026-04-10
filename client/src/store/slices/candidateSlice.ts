@@ -1,46 +1,30 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import type { CandidateUser } from '@/shared/types';
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
+import type { CandidateUser } from '@/shared/types'
 
 interface CandidateState {
-  user: CandidateUser | null;
-  accessToken: string | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  error: string | null;
+  candidate: CandidateUser | null
+  isAuthenticated: boolean
 }
 
 const initialState: CandidateState = {
-  user: null,
-  accessToken: null,
+  candidate: null,
   isAuthenticated: false,
-  isLoading: false,
-  error: null,
-};
+}
 
 const candidateSlice = createSlice({
   name: 'candidate',
   initialState,
   reducers: {
-    loginCandidate(state, action: PayloadAction<{ user: CandidateUser; accessToken: string }>) {
-      state.user = action.payload.user;
-      state.accessToken = action.payload.accessToken;
-      state.isAuthenticated = true;
-      state.error = null;
+    candidateLogin: (state, action: PayloadAction<CandidateUser>) => {
+      state.candidate = action.payload
+      state.isAuthenticated = true
     },
-    logoutCandidate(state) {
-      Object.assign(state, initialState);
-    },
-    setAccessToken(state, action: PayloadAction<string>) {
-      state.accessToken = action.payload;
-    },
-    setLoading(state, action: PayloadAction<boolean>) {
-      state.isLoading = action.payload;
-    },
-    setError(state, action: PayloadAction<string | null>) {
-      state.error = action.payload;
+    candidateLogout: (state) => {
+      state.candidate = null
+      state.isAuthenticated = false
     },
   },
-});
+})
 
-export const { loginCandidate, logoutCandidate, setAccessToken, setLoading, setError } = candidateSlice.actions;
-export default candidateSlice.reducer;
+export const { candidateLogin, candidateLogout } = candidateSlice.actions
+export default candidateSlice.reducer
