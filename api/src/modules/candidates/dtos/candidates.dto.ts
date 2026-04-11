@@ -1,24 +1,25 @@
 export type Education = {
-  id: string
+  id?: string
   type: 'academic' | 'institution'
   institution: string
   degree: string
   field_of_study: string
   start_year: number
-  end_year: number | null
+  end_year?: number | null
   is_current: boolean
 }
 
 export type Experience = {
-  id: string
+  id?: string
   company: string
   position: string
-  location: string | null
+  location?: string | null
   start_date: string
-  end_date: string | null
+  end_date?: string | null
   is_current: boolean
-  description: string | null
+  description?: string | null
 }
+
 
 export type UpdateProfileDTO = {
   full_name?: string

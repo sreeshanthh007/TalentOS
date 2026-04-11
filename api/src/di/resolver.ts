@@ -22,15 +22,11 @@ export class Resolver {
 
   public static registerControllers(): void {
     this.authController = new AuthController(
-      UseCaseRegistry.registerCandidateUsecase,
-      UseCaseRegistry.registerEmployerUsecase,
-      UseCaseRegistry.loginUsecase,
-      UseCaseRegistry.refreshTokenUsecase,
-      UseCaseRegistry.blacklistTokenUsecase,
-      UseCaseRegistry.revokeRefreshTokenUsecase,
+      UseCaseRegistry.authUsecase,
       this.cloudinarySignatureService
     );
     this.publicController = new PublicController(UseCaseRegistry.publicUseCase);
     this.candidatesController = new CandidatesController(UseCaseRegistry.candidateUseCase);
   }
+
 }

@@ -4,6 +4,11 @@ import { asyncHandler } from '@shared/utils/asyncHandler'
 import { HTTP_STATUS } from '@shared/constants/statusCodes.constants'
 import { CustomRequest } from '@shared/middlewares/auth.middleware'
 import { MESSAGES } from '@shared/constants/messages.constants'
+import { 
+  updateProfileSchema, 
+  applyJobSchema, 
+  generateResumeSchema 
+} from '../validators/candidates.validator'
 
 export class CandidatesController {
   constructor(private readonly candidateUsecase: CandidateUsecase) {}
@@ -20,7 +25,8 @@ export class CandidatesController {
 
   updateProfile = asyncHandler(async (req: Request, res: Response) => {
     const userId = (req as CustomRequest).user.id
-    const updated = await this.candidateUsecase.updateProfile(userId, req.body)
+    const validatedData = updateProfileSchema.parse(req.body)
+    const updated = await this.candidateUsecase.updateProfile(userId, validatedData)
     res.status(HTTP_STATUS.OK).json({
       success: true,
       message: MESSAGES.CANDIDATE.PROFILE_UPDATE_SUCCESS,
@@ -50,7 +56,8 @@ export class CandidatesController {
 
   applyForJob = asyncHandler(async (req: Request, res: Response) => {
     const userId = (req as CustomRequest).user.id
-    const application = await this.candidateUsecase.applyForJob(userId, req.body)
+    const validatedData = applyJobSchema.parse(req.body)
+    const application = await this.candidateUsecase.applyForJob(userId, validatedData)
     res.status(HTTP_STATUS.CREATED).json({
       success: true,
       message: MESSAGES.CANDIDATE.APPLY_SUCCESS,
@@ -60,8 +67,8 @@ export class CandidatesController {
 
   generateResume = asyncHandler(async (req: Request, res: Response) => {
     const userId = (req as CustomRequest).user.id
-    const { target_job_title } = req.body
-    const result = await this.candidateUsecase.generateResumeContent(userId, target_job_title)
+    const validatedData = generateResumeSchema.parse(req.body)
+    const result = await this.candidateUsecase.generateResumeContent(userId, validatedData.target_job_title)
     res.status(HTTP_STATUS.OK).json({
       success: true,
       message: MESSAGES.CANDIDATE.RESUME_GENERATE_SUCCESS,
@@ -69,3 +76,4 @@ export class CandidatesController {
     })
   })
 }
+

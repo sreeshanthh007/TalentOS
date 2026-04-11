@@ -53,7 +53,11 @@ export const EmployerRegisterForm: React.FC<EmployerRegisterFormProps> = ({ onSu
 
   return (
     <>
-      <MultiStepProgress currentStep={step} />
+      <MultiStepProgress 
+        currentStep={step} 
+        totalSteps={3}
+        labels={['Account Info', 'Company Profile', 'Choose Plan']}
+      />
       
       <form 
         onSubmit={formik.handleSubmit}
