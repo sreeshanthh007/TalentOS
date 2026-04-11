@@ -30,7 +30,11 @@ export const CandidateRegisterForm: React.FC<CandidateRegisterFormProps> = ({
 
   return (
     <>
-      <MultiStepProgress currentStep={step} totalSteps={4} />
+      <MultiStepProgress 
+        currentStep={step} 
+        totalSteps={4} 
+        labels={['Personal Info', 'Skills & Location', 'Resume', 'Review']}
+      />
       
       <form 
         onSubmit={formik.handleSubmit}

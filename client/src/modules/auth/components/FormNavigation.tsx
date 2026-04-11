@@ -17,6 +17,7 @@ export const FormNavigation: React.FC<FormNavigationProps> = ({
   totalSteps,
   onBack,
   onNext,
+  onSubmit,
   isSubmitting,
   isLoading,
   isNextDisabled,
@@ -27,6 +28,7 @@ export const FormNavigation: React.FC<FormNavigationProps> = ({
     <div className="flex justify-between mt-4">
       {step > 0 ? (
         <motion.button
+          key="back-btn"
           type="button"
           onClick={onBack}
           whileHover={{ scale: 1.02 }}
@@ -39,6 +41,7 @@ export const FormNavigation: React.FC<FormNavigationProps> = ({
 
       {!isLastStep ? (
         <motion.button
+          key="next-btn"
           type="button"
           onClick={onNext}
           disabled={isSubmitting || isNextDisabled}
@@ -50,7 +53,9 @@ export const FormNavigation: React.FC<FormNavigationProps> = ({
         </motion.button>
       ) : (
         <motion.button
-          type="submit"
+          key="submit-btn"
+          type="button"
+          onClick={onSubmit}
           disabled={isSubmitting || isLoading}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
@@ -62,3 +67,4 @@ export const FormNavigation: React.FC<FormNavigationProps> = ({
     </div>
   )
 }
+

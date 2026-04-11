@@ -6,11 +6,10 @@ import { cn } from '@/shared/utils/cn'
 interface MultiStepProgressProps {
   currentStep: number
   totalSteps?: number
+  labels?: string[]
 }
 
-const stepsLabels = ['Personal Info', 'Skills & Location', 'Resume', 'Review']
-
-export const MultiStepProgress: React.FC<MultiStepProgressProps> = ({ currentStep, totalSteps = 3 }) => {
+export const MultiStepProgress: React.FC<MultiStepProgressProps> = ({ currentStep, totalSteps = 3, labels }) => {
   return (
     <div className="flex items-center justify-between w-full mb-8 relative">
       <div className="absolute top-1/2 left-0 w-full h-1 bg-gray-800 -z-10 -translate-y-1/2" />
@@ -38,7 +37,7 @@ export const MultiStepProgress: React.FC<MultiStepProgressProps> = ({ currentSte
               "absolute -bottom-6 text-xs whitespace-nowrap transition-colors",
               isActive ? "text-teal-400 font-bold" : isCompleted ? "text-gray-300 font-medium" : "text-gray-500"
             )}>
-              {stepsLabels[index] || `Step ${stepNum}`}
+              {labels?.[index] || `Step ${stepNum}`}
             </div>
           </div>
         )
@@ -46,3 +45,4 @@ export const MultiStepProgress: React.FC<MultiStepProgressProps> = ({ currentSte
     </div>
   )
 }
+
