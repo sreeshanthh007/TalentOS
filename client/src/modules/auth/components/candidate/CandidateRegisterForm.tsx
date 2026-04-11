@@ -1,57 +1,36 @@
 import React, { useState } from 'react';
-import { useFormik } from 'formik';
 import { AnimatePresence } from 'framer-motion';
 import { Eye, EyeOff } from 'lucide-react';
-import { candidateValidationSchema } from '@/shared/validators/auth.validators';
-import { useMultiStepForm } from '@/modules/auth/hooks/useMultiStepForm';
 import { skillsList } from '@/modules/auth/constants/auth.constants';
 import { MultiStepProgress } from '../MultiStepProgress';
 import { StepWrapper } from '../StepWrapper';
 import { FormNavigation } from '../FormNavigation';
+import { ResumeUploadStep } from './ResumeUploadStep';
 import type { CandidateRegisterValues } from '@/shared/types';
+import { type FormikProps } from 'formik';
 
 interface CandidateRegisterFormProps {
-  onSubmit: (values: CandidateRegisterValues) => void;
+  formik: FormikProps<CandidateRegisterValues>;
+  step: number;
+  direction: number;
+  handleNext: (formik: FormikProps<CandidateRegisterValues>) => void;
+  handleBack: () => void;
   isLoading?: boolean;
 }
 
-export const CandidateRegisterForm: React.FC<CandidateRegisterFormProps> = ({ onSubmit, isLoading }) => {
+export const CandidateRegisterForm: React.FC<CandidateRegisterFormProps> = ({ 
+  formik,
+  step,
+  direction,
+  handleNext,
+  handleBack,
+  isLoading 
+}) => {
   const [showPassword, setShowPassword] = useState(false);
-
-  const {
-    step,
-    direction,
-    handleNext,
-    handleBack,
-    isLastStep
-  } = useMultiStepForm<CandidateRegisterValues>({
-    totalSteps: 3,
-    getFieldsToValidate: (s) => {
-      if (s === 0) return ['full_name', 'email', 'password', 'phone'];
-      if (s === 1) return ['skills', 'location'];
-      return [];
-    }
-  });
-
-  const formik = useFormik<CandidateRegisterValues>({
-    initialValues: {
-      full_name: '',
-      email: '',
-      password: '',
-      phone: '',
-      skills: [],
-      location: '',
-    },
-    validationSchema: candidateValidationSchema,
-    onSubmit: (values) => {
-      if (!isLastStep) return;
-      onSubmit(values);
-    },
-  });
 
   return (
     <>
-      <MultiStepProgress currentStep={step} />
+      <MultiStepProgress currentStep={step} totalSteps={4} />
       
       <form 
         onSubmit={formik.handleSubmit}
@@ -175,24 +154,42 @@ export const CandidateRegisterForm: React.FC<CandidateRegisterFormProps> = ({ on
           )}
 
           {step === 2 && (
-            <StepWrapper direction={direction} stepKey="step2" className="flex flex-col gap-4 text-gray-300">
+            <StepWrapper direction={direction} stepKey="step2" className="flex flex-col gap-4">
+              <ResumeUploadStep
+                resumeUrl={formik.values.resume_url}
+                onUploadComplete={(url) => formik.setFieldValue('resume_url', url)}
+                error={formik.touched.resume_url ? formik.errors.resume_url : undefined}
+              />
+            </StepWrapper>
+          )}
+
+          {step === 3 && (
+            <StepWrapper direction={direction} stepKey="step3" className="flex flex-col gap-4 text-gray-300">
               <h3 className="text-xl text-teal-400 mb-2">Review Details</h3>
               <p><strong>Name:</strong> {formik.values.full_name}</p>
               <p><strong>Email:</strong> {formik.values.email}</p>
               <p><strong>Location:</strong> {formik.values.location || 'N/A'}</p>
               <p><strong>Skills:</strong> {formik.values.skills.join(', ') || 'None'}</p>
+              <p>
+                <strong>Resume:</strong>{' '}
+                {formik.values.resume_url
+                  ? <span className="text-teal-400">✓ Uploaded</span>
+                  : <span className="text-red-400">Not uploaded</span>
+                }
+              </p>
             </StepWrapper>
           )}
         </AnimatePresence>
 
         <FormNavigation
           step={step}
-          totalSteps={3}
+          totalSteps={4}
           onBack={handleBack}
           onNext={() => handleNext(formik)}
           onSubmit={formik.handleSubmit}
           isSubmitting={formik.isSubmitting}
           isLoading={isLoading}
+          isNextDisabled={step === 2 && !formik.values.resume_url}
         />
       </form>
     </>

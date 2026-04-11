@@ -31,7 +31,8 @@ export class RegisterCandidateUsecase {
       full_name: data.full_name,
       phone: data.phone,
       location: data.location,
-      skills: data.skills
+      skills: data.skills,
+      resume_url: data.resume_url,
     });
   }
 }

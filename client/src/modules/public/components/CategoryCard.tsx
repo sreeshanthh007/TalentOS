@@ -9,9 +9,15 @@ type CategoryCardProps = {
 }
 
 export const CategoryCard: React.FC<CategoryCardProps> = ({ category, onClick }) => {
-  // Try to find the icon from lucide-react dynamically
-  // Type assertion since we don't know if dynamically fetched string matches an exported icon
-  const IconComponent = (Icons as any)[category.icon] || Icons.Briefcase
+  const toPascalCase = (str: string) => {
+    return str
+      .split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join('');
+  }
+
+  const iconName = toPascalCase(category.icon || '');
+  const IconComponent = (Icons as any)[iconName] || Icons.Briefcase;
 
   return (
     <motion.div

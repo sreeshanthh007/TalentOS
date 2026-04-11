@@ -8,7 +8,7 @@ interface MultiStepProgressProps {
   totalSteps?: number
 }
 
-const stepsLabels = ['Personal Info', 'Details', 'Review']
+const stepsLabels = ['Personal Info', 'Skills & Location', 'Resume', 'Review']
 
 export const MultiStepProgress: React.FC<MultiStepProgressProps> = ({ currentStep, totalSteps = 3 }) => {
   return (
@@ -17,17 +17,17 @@ export const MultiStepProgress: React.FC<MultiStepProgressProps> = ({ currentSte
       
       {Array.from({ length: totalSteps }).map((_, index) => {
         const stepNum = index + 1
-        const isActive = stepNum === currentStep
-        const isCompleted = stepNum < currentStep
+        const isActive = index === currentStep
+        const isCompleted = index < currentStep
 
         return (
           <div key={stepNum} className="flex flex-col items-center relative">
             <motion.div
               layoutId={isActive ? 'activeStep' : undefined}
               className={cn(
-                "w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold border-2 bg-[#0B0F19] transition-colors duration-300",
-                isCompleted ? "border-[#0D4F4F] bg-[#0D4F4F] text-white" : "",
-                isActive ? "border-[#0D4F4F] bg-[#0D4F4F] text-white" : "",
+                "w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold border-2 bg-[#0B0F19] transition-all duration-300",
+                isCompleted ? "border-teal-600 bg-teal-600 text-slate-900 shadow-[0_0_15px_rgba(20,184,166,0.3)]" : "",
+                isActive ? "border-teal-400 text-teal-400 shadow-[0_0_10px_rgba(45,212,191,0.2)]" : "",
                 !isActive && !isCompleted ? "border-gray-700 text-gray-400" : ""
               )}
             >
@@ -36,7 +36,7 @@ export const MultiStepProgress: React.FC<MultiStepProgressProps> = ({ currentSte
             
             <div className={cn(
               "absolute -bottom-6 text-xs whitespace-nowrap transition-colors",
-              isActive || isCompleted ? "text-gray-300 font-medium" : "text-gray-500"
+              isActive ? "text-teal-400 font-bold" : isCompleted ? "text-gray-300 font-medium" : "text-gray-500"
             )}>
               {stepsLabels[index] || `Step ${stepNum}`}
             </div>

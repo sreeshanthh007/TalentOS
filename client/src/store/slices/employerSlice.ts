@@ -1,5 +1,6 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import type { EmployerUser } from '@/shared/types'
+import { getSession } from '@/shared/utils/session'
 
 interface EmployerState {
   employer: EmployerUser | null
@@ -8,7 +9,7 @@ interface EmployerState {
 
 const initialState: EmployerState = {
   employer: null,
-  isAuthenticated: false,
+  isAuthenticated: getSession()?.role === 'employer',
 }
 
 const employerSlice = createSlice({

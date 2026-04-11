@@ -7,6 +7,8 @@ import { RefreshTokenUsecase } from '@modules/auth/usecases/refreshToken.usecase
 import { generateAccessTokenUsecase } from '@modules/auth/usecases/generateToken.usecase';
 import { RevokeRefreshTokenUseCase } from '@modules/auth/usecases/revokeRefreshToken.usecase';
 import { BlacklistTokenUseCase } from '@modules/auth/usecases/blacklistToken.usecase';
+import { PublicUseCase } from '@modules/public/usecases/public.usecase';
+import { CandidateUsecase } from '@modules/candidates/usecases/candidate.usecase';
 
 export class UseCaseRegistry {
   public static registerCandidateUsecase: RegisterCandidateUsecase;
@@ -16,6 +18,8 @@ export class UseCaseRegistry {
   public static generateAccessTokenUsecase: generateAccessTokenUsecase;
   public static revokeRefreshTokenUsecase: RevokeRefreshTokenUseCase;
   public static blacklistTokenUsecase: BlacklistTokenUseCase;
+  public static publicUseCase: PublicUseCase;
+  public static candidateUseCase: CandidateUsecase;
 
   public static registerUseCases(): void {
     const authRepo = RepositoryRegistry.authRepository;
@@ -45,5 +49,7 @@ export class UseCaseRegistry {
     this.refreshTokenUsecase = new RefreshTokenUsecase(tokenService);
     this.revokeRefreshTokenUsecase = new RevokeRefreshTokenUseCase();
     this.blacklistTokenUsecase = new BlacklistTokenUseCase(tokenService);
+    this.publicUseCase = new PublicUseCase(RepositoryRegistry.publicRepository);
+    this.candidateUseCase = new CandidateUsecase(RepositoryRegistry.candidatesRepository);
   }
 }

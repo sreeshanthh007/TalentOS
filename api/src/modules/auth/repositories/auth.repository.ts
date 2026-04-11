@@ -60,7 +60,8 @@ export class AuthRepository implements IAuthRepository {
         full_name: data.full_name || null,
         phone: data.phone || null,
         location: data.location || null,
-        skills: data.skills || []
+        skills: data.skills || [],
+        resume_url: data.resume_url || null,
       });
 
     if (error) {

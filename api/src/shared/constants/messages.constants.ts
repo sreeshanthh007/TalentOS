@@ -13,13 +13,23 @@ export const MESSAGES = {
     DELETE_SUCCESS: "Job deleted successfully",
     NOT_FOUND: "Job not found"
   },
+  CATEGORY:{
+    FETCH_SUCCESS: "Categories fetched successfully",
+    NOT_FOUND: "Category not found"
+  },
   EMPLOYER: {
     PROFILE_UPDATE_SUCCESS: "Employer profile updated successfully",
     NOT_FOUND: "Employer not found"
   },
   CANDIDATE: {
+    PROFILE_FETCH_SUCCESS: "Profile fetched successfully",
     PROFILE_UPDATE_SUCCESS: "Candidate profile updated successfully",
-    NOT_FOUND: "Candidate not found"
+    APPLICATIONS_FETCH_SUCCESS: "Applications fetched successfully",
+    SHORTLISTED_FETCH_SUCCESS: "Shortlisted applications fetched successfully",
+    APPLY_SUCCESS: "Application submitted successfully",
+    RESUME_GENERATE_SUCCESS: "Resume content generated successfully",
+    NOT_FOUND: "Candidate not found",
+    ALREADY_APPLIED: "You have already applied for this job"
   },
   ADMIN: {
     ACTION_SUCCESS: "Admin action completed successfully",
@@ -42,4 +52,5 @@ export const ERROR_MESSAGES = {
   EMAIL_EXISTS: "User with this email already exists",
   BAD_REQUEST: "Bad Request",
   COMPANY_EMAIL: "Please use your company email address",
+  FOLDER_NOT_FOUND: "Folder not found",
 };

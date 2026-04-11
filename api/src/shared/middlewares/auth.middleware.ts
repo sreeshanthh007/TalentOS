@@ -5,6 +5,7 @@ import { Resolver } from '@di/index';
 import { HTTP_STATUS } from '@shared/constants/statusCodes.constants';
 import { ERROR_MESSAGES } from '@shared/constants/messages.constants';
 import { ROLE_MAP } from '@shared/constants/roles.constants';
+import { logger } from '@shared/utils/logger';
 
 export interface CustomJWTPayload extends JwtPayload {
   id: string;
@@ -21,7 +22,7 @@ export interface CustomRequest extends Request {
 const extractToken = (req: Request): { access_token: string; refresh_token: string } | null => {
   const basePath = req.baseUrl.split("/");
 
-  const userType = ROLE_MAP[basePath[2]];
+  const userType = ROLE_MAP[basePath[3]];
 
   if (["admin", "employer", "candidate"].includes(userType)) {
     return {
@@ -41,7 +42,7 @@ const isBlacklisted = async (token: string): Promise<boolean> => {
 export const verifyAuth = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const token = extractToken(req);
-
+    logger.info("token is",token)
     if (!token || !token.access_token) {
       res.status(HTTP_STATUS.UNAUTHORIZED).json({ 
         success: false,

@@ -1,5 +1,7 @@
 import * as Yup from 'yup'
 
+import { MESSAGES } from '../constants/messages.constants'
+
 export const loginValidationSchema = Yup.object({
   email: Yup.string()
     .email('Please enter a valid email address')
@@ -28,6 +30,7 @@ export const candidateValidationSchema = Yup.object({
     .min(1, 'Please select at least one skill')
     .required('This field is required'),
   location: Yup.string().required('This field is required'),
+  resume_url: Yup.string().required(MESSAGES.UPLOAD.RESUME_REQUIRED),
 })
 
 const invalidDomains = [
