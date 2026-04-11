@@ -12,6 +12,10 @@ import { ROUTES } from '@/shared/constants/routes.constants';
 import { setSession } from '@/shared/utils/session';
 import { pageVariants } from '@/shared/animations/auth.animations';
 import { CandidateRegisterForm } from '../components/candidate/CandidateRegisterForm';
+import { useFormik } from 'formik';
+import { useMultiStepForm } from '@/modules/auth/hooks/useMultiStepForm';
+import { candidateValidationSchema } from '@/shared/validators/auth.validators';
+import { MESSAGES } from '@/shared/constants/messages.constants';
 
 const CandidateRegisterPage: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -21,7 +25,46 @@ const CandidateRegisterPage: React.FC = () => {
   const { mutate: register, isPending: isRegistering } = useRegisterCandidate();
   const { mutate: login, isPending: isLoggingIn } = useLogin();
 
+  const {
+    step,
+    direction,
+    handleNext,
+    handleBack,
+    isLastStep
+  } = useMultiStepForm<CandidateRegisterValues>({
+    totalSteps: 4,
+    getFieldsToValidate: (s) => {
+      if (s === 0) return ['full_name', 'email', 'password', 'phone'];
+      if (s === 1) return ['skills', 'location'];
+      if (s === 2) return ['resume_url'];
+      return [];
+    }
+  });
+
+  const formik = useFormik<CandidateRegisterValues>({
+    initialValues: {
+      full_name: '',
+      email: '',
+      password: '',
+      phone: '',
+      skills: [],
+      location: '',
+      resume_url: '',
+    },
+    validationSchema: candidateValidationSchema,
+    onSubmit: (values) => {
+      handleRegisterSubmit(values);
+    },
+  });
+
   const handleRegisterSubmit = (values: CandidateRegisterValues) => {
+    if (!isLastStep) return;
+    
+    if (!values.resume_url) {
+      toast.error(MESSAGES.UPLOAD.RESUME_REQUIRED);
+      return;
+    }
+
     register(values, {
       onSuccess: () => {
         login({
@@ -61,7 +104,14 @@ const CandidateRegisterPage: React.FC = () => {
           <p className="text-gray-400">Create your candidate profile</p>
         </div>
 
-        <CandidateRegisterForm onSubmit={handleRegisterSubmit} isLoading={isRegistering || isLoggingIn} />
+        <CandidateRegisterForm 
+          formik={formik}
+          step={step}
+          direction={direction}
+          handleNext={handleNext}
+          handleBack={handleBack}
+          isLoading={isRegistering || isLoggingIn} 
+        />
         
         <div className="mt-6 text-center text-gray-400">
           Already have an account? <Link to={ROUTES.AUTH.LOGIN} className="text-teal-400 hover:underline">Log in</Link>

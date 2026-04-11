@@ -9,6 +9,66 @@ export type BaseUser = {
   created_at: string
 }
 
+export type Education = {
+  id: string
+  type: 'academic' | 'institution'
+  institution: string
+  degree: string
+  field_of_study: string
+  start_year: number
+  end_year: number | null
+  is_current: boolean
+}
+
+export type Experience = {
+  id: string
+  company: string
+  position: string
+  location: string | null
+  start_date: string    // 'YYYY-MM'
+  end_date: string | null
+  is_current: boolean
+  description: string | null
+}
+
+export type Application = {
+  id: string
+  job_id: string
+  candidate_id: string
+  status: 'applied' | 'shortlisted' | 'interviewing' | 'offered' | 'hired' | 'rejected'
+  star_rating: number | null
+  employer_notes: string | null
+  applied_at: string
+  updated_at: string
+  job?: Job   // joined
+}
+
+export type ProfileCompletionResult = {
+  percentage: number
+  missing: string[]
+}
+
+export type ResumeBuilderInput = {
+  target_job_title: string
+}
+
+export type ResumeBuilderOutput = {
+  summary: string
+  skills_section: string
+  experience_bullets: string[]
+}
+
+export type UpdateCandidateProfilePayload = {
+  full_name?: string
+  phone?: string
+  bio?: string
+  location?: string
+  skills?: string[]
+  avatar_url?: string
+  education?: Education[]
+  experience?: Experience[]
+}
+
 export type CandidateUser = BaseUser & {
   full_name: string | null
   phone: string | null
@@ -17,6 +77,8 @@ export type CandidateUser = BaseUser & {
   location: string | null
   skills: string[]
   resume_url: string | null
+  education: Education[]
+  experience: Experience[]
 }
 
 export type EmployerUser = BaseUser & {
@@ -55,6 +117,7 @@ export type CandidateRegisterValues = {
   phone: string
   skills: string[]
   location: string
+  resume_url: string
 }
 
 export type EmployerRegisterValues = {

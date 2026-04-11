@@ -5,6 +5,7 @@ export interface RegisterCandidateDTO {
   phone?: string;
   location?: string;
   skills?: string[];
+  resume_url?: string;
 }
 
 export interface RegisterEmployerDTO {

@@ -18,7 +18,8 @@ export const registerCandidateSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
   phone: z.string().optional(),
   location: z.string().optional(),
-  skills: z.array(z.string()).optional()
+  skills: z.array(z.string()).optional(),
+  resume_url: z.string().optional()
 });
 
 export const registerEmployerSchema = z.object({

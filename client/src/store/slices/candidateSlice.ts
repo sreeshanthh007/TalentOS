@@ -1,5 +1,6 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import type { CandidateUser } from '@/shared/types'
+import { getSession } from '@/shared/utils/session'
 
 interface CandidateState {
   candidate: CandidateUser | null
@@ -8,7 +9,7 @@ interface CandidateState {
 
 const initialState: CandidateState = {
   candidate: null,
-  isAuthenticated: false,
+  isAuthenticated: getSession()?.role === 'candidate',
 }
 
 const candidateSlice = createSlice({

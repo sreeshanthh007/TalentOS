@@ -7,7 +7,7 @@ import {
 } from '../validators/auth.validator';
 import { asyncHandler } from '@shared/utils/asyncHandler';
 import { HTTP_STATUS } from '@shared/constants/statusCodes.constants';
-import { MESSAGES } from '@shared/constants/messages.constants';
+import { ERROR_MESSAGES, MESSAGES } from '@shared/constants/messages.constants';
 import { RegisterCandidateUsecase } from '../usecases/registerCandidate.usecase';
 import { RegisterEmployerUsecase } from '../usecases/registerEmployer.usecase';
 import { LoginUsecase } from '../usecases/login.usecase';
@@ -15,6 +15,9 @@ import { RefreshTokenUsecase } from '../usecases/refreshToken.usecase';
 import { BlacklistTokenUseCase } from '../usecases/blacklistToken.usecase';
 import { RevokeRefreshTokenUseCase } from '../usecases/revokeRefreshToken.usecase';
 import { setAuthCookies, updateCookieWithAccessToken, clearAuthCookie } from '@shared/utils/cookie.util';
+import { ICloudService } from '../interfaces/ICloudservice';
+import { CustomRequest } from '@shared/middlewares/auth.middleware';
+import { logger } from '@shared/utils/logger';
 
 export class AuthController {
   constructor(
@@ -24,6 +27,7 @@ export class AuthController {
     private readonly refreshTokenUsecase: RefreshTokenUsecase,
     private readonly blacklistTokenUsecase: BlacklistTokenUseCase,
     private readonly revokeRefreshTokenUsecase: RevokeRefreshTokenUseCase,
+    private readonly cloudinarySignatureService: ICloudService,
   ) {}
 
   registerCandidate = asyncHandler(async (req: Request, res: Response) => {
@@ -91,10 +95,27 @@ export class AuthController {
     });
   });
 
-  logout = asyncHandler(async (req: Request, res: Response) => {
+
+  getCloudinarySignature = asyncHandler(async (req: Request, res: Response) => {
+    const { folder } = req.query;
+
+    if(!folder){
+        return res.status(HTTP_STATUS.BAD_REQUEST)
+            .json({success:false,message:ERROR_MESSAGES.FOLDER_NOT_FOUND})
+    }
+
+    const signature = this.cloudinarySignatureService.generateSignature(folder as string);
     
-    const accessToken = req.headers.authorization?.split(' ')[1];
-    const role = req.body.role || 'candidate'; 
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data: signature
+    });
+  });
+
+  logout = asyncHandler(async (req: Request, res: Response) => {
+    const role = (req as CustomRequest).user?.role
+ 
+    const accessToken = req.cookies[`${role}_access_token`];
     const refreshToken = req.cookies[`${role}_refresh_token`];
 
     if (accessToken) await this.blacklistTokenUsecase.execute(accessToken);

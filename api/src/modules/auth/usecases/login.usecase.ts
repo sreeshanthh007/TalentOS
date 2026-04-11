@@ -29,7 +29,7 @@ export class LoginUsecase {
 
     const isPasswordMatch = await this.bcryptService.compare(data.password, user.password_hash);
     if (!isPasswordMatch) {
-      throw new CustomError(ERROR_MESSAGES.UNAUTHORIZED, HTTP_STATUS.UNAUTHORIZED);
+      throw new CustomError(ERROR_MESSAGES.INVALID_CREDENTIALS, HTTP_STATUS.UNAUTHORIZED);
     }
 
     const { accessToken, refreshToken } = await this.generateTokenUsecase.execute(

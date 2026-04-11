@@ -7,9 +7,10 @@ export const ROUTES = {
   },
   CANDIDATE: {
     DASHBOARD: '/candidate/dashboard',
-    PROFILE: '/candidate/profile',
-    RESUME_BUILDER: '/candidate/resume-builder',
     APPLIED_JOBS: '/candidate/applied-jobs',
+    SHORTLISTED: '/candidate/shortlisted',
+    RESUME_BUILDER: '/candidate/resume-builder',
+    PROFILE: '/candidate/profile',
   },
   EMPLOYER: {
     DASHBOARD: '/employer/dashboard',
