@@ -3,7 +3,7 @@ import { updateCandidateProfileApi } from '../services/candidate.service'
 import { useAppDispatch } from '@/store/hooks'
 import { candidateLogin } from '@/store/slices/candidateSlice'
 import { toast } from 'sonner'
-import { MESSAGES } from '@/shared/constants/messages.constants'
+
 
 export function useUpdateCandidateProfile() {
   const queryClient = useQueryClient()

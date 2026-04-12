@@ -1,14 +1,17 @@
-import { ICandidateRepository } from '../interfaces/ICandidateRepository'
-import { UpdateProfileDTO, ApplyJobDTO, ResumeBuilderOutput } from '../dtos/candidates.dto'
-import { CandidateProfileData, ApplicationModel } from '../../auth/models/user.model'
-import { HTTP_STATUS } from '@shared/constants/statusCodes.constants'
-import { GoogleGenerativeAI } from '@google/generative-ai'
-import { config } from '@shared/config/env.config'
+import { ICandidateRepository } from '@modules/candidates/interfaces/ICandidateRepository'
+import { UpdateProfileDTO, ApplyJobDTO, ResumeBuilderOutput } from '@modules/candidates/dtos/candidates.dto'
+import { CandidateProfileData, ApplicationModel } from '@modules/auth/models/user.model'
+import { IAIService } from '@shared/interfaces/IAIService'
+import { AI_PROMPTS } from '@shared/constants/ai.constants'
+import { MESSAGES } from '@shared/constants/messages.constants'
 import { CustomError } from '@shared/utils/CustomError'
-import { ERROR_MESSAGES, MESSAGES } from '@shared/constants/messages.constants'
+import { HTTP_STATUS } from '@shared/constants/statusCodes.constants'
 
 export class CandidateUsecase {
-  constructor(private readonly candidateRepository: ICandidateRepository) {}
+  constructor(
+    private readonly candidateRepository: ICandidateRepository,
+    private readonly aiService: IAIService
+  ) {}
 
   async getProfile(userId: string): Promise<CandidateProfileData> {
     const profile = await this.candidateRepository.findProfileByUserId(userId)
@@ -48,6 +51,7 @@ export class CandidateUsecase {
     })
   }
 
+
   async generateResumeContent(userId: string, targetJobTitle: string): Promise<ResumeBuilderOutput> {
     const profile = await this.getProfile(userId)
     
@@ -55,38 +59,13 @@ export class CandidateUsecase {
     const experience = profile.experience || []
     const education = profile.education || []
 
-    const prompt = `
-      You are a professional resume writer. Generate resume content for a candidate applying for the role of "${targetJobTitle}".
-      Candidate Profile:
-      Skills: ${skills.join(', ')}
-      Experience: ${JSON.stringify(experience)}
-      Education: ${JSON.stringify(education)}
+    const prompt = AI_PROMPTS.RESUME_GENERATION(targetJobTitle, skills, experience, education)
+    
+    return await this.aiService.generateResponse<ResumeBuilderOutput>(prompt)
+  }
 
-      Return a JSON object with exactly these fields:
-      {
-        "summary": "2-3 sentence professional summary",
-        "skills_section": "formatted skills as comma-separated string",
-        "experience_bullets": ["bullet 1", "bullet 2", "bullet 3"]
-      }
-      Return ONLY the JSON object, no markdown, no explanation.
-    `
-
-    try {
-      if (!config.GEMINI_API_KEY) {
-         throw new CustomError('Gemini API key is missing', HTTP_STATUS.INTERNAL_SERVER_ERROR)
-      }
-      const genAI = new GoogleGenerativeAI(config.GEMINI_API_KEY)
-      const model = genAI.getGenerativeModel({ model: 'gemini-pro' })
-      const result = await model.generateContent(prompt)
-      const text = result.response.text()
-      
-      const jsonStr = text.replace(/```json|```/g, '').trim()
-      const parsed = JSON.parse(jsonStr) as ResumeBuilderOutput
-      
-      return parsed
-    } catch (error) {
-      console.error('AI Resume Generation error:', error)
-      throw new CustomError('Failed to generate resume content', HTTP_STATUS.INTERNAL_SERVER_ERROR)
-    }
+  async updateAvatar(userId: string, avatarUrl: string): Promise<CandidateProfileData> {
+    return await this.candidateRepository.updateProfile(userId, { avatar_url: avatarUrl })
   }
 }
+

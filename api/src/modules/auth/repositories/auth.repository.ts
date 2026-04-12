@@ -69,8 +69,8 @@ export class AuthRepository implements IAuthRepository {
     }
   }
 
-  async createEmployerProfile(userId: string, data: Partial<EmployerProfileData>): Promise<void> {
-    const { error } = await supabaseClient
+  async createEmployerProfile(userId: string, data: Partial<EmployerProfileData>): Promise<{ id: string }> {
+    const { data: profile, error } = await supabaseClient
       .from('employer_profiles')
       .insert({
         user_id: userId,
@@ -79,6 +79,43 @@ export class AuthRepository implements IAuthRepository {
         industry: data.industry || null,
         website: data.website || null,
         phone: data.phone || null
+      })
+      .select('id')
+      .single();
+
+    if (error) {
+      throw new CustomError(ERROR_MESSAGES.SERVER_ERROR, HTTP_STATUS.INTERNAL_SERVER_ERROR);
+    }
+
+    return profile as { id: string };
+  }
+
+  async findPlanByName(planName: string): Promise<{ id: string; job_listing_limit: number } | null> {
+    const { data, error } = await supabaseClient
+      .from('subscription_plans')
+      .select('id, job_listing_limit')
+      .eq('name', planName)
+      .maybeSingle();
+
+    if (error) {
+      throw new CustomError(ERROR_MESSAGES.SERVER_ERROR, HTTP_STATUS.INTERNAL_SERVER_ERROR);
+    }
+
+    return data as { id: string; job_listing_limit: number } | null;
+  }
+
+  async createEmployerSubscription(employerId: string, planId: string): Promise<void> {
+    const expiresAt = new Date();
+    expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+
+    const { error } = await supabaseClient
+      .from('employer_subscriptions')
+      .insert({
+        employer_id: employerId,
+        plan_id: planId,
+        status: 'active',
+        started_at: new Date().toISOString(),
+        expires_at: expiresAt.toISOString(),
       });
 
     if (error) {

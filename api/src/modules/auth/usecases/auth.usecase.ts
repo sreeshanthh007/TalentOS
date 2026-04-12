@@ -1,6 +1,6 @@
-import { IAuthRepository } from '../interfaces/IAuthRepository';
-import { IBcryptService } from '../interfaces/IBcryptService';
-import { ITokenService, JwtPayload } from '../interfaces/ITokenService';
+import { IAuthRepository } from '@modules/auth/interfaces/IAuthRepository';
+import { IBcryptService } from '@modules/auth/interfaces/IBcryptService';
+import { ITokenService, JwtPayload } from '@modules/auth/interfaces/ITokenService';
 import { 
   LoginInputDTO, 
   LoginOutputDTO, 
@@ -8,11 +8,11 @@ import {
   RegisterEmployerDTO, 
   RefreshTokenInputDTO, 
   TokenResponseDTO 
-} from '../dtos/auth.dto';
+} from '@modules/auth/dtos/auth.dto';
 import { CustomError } from '@shared/utils/CustomError';
 import { HTTP_STATUS } from '@shared/constants/statusCodes.constants';
 import { ERROR_MESSAGES } from '@shared/constants/messages.constants';
-import { validateCompanyDomain } from '../validators/auth.validator';
+import { validateCompanyDomain } from '@modules/auth/validators/auth.validator';
 import { RedisClient } from "@shared/config/redis.config";
 import { UserRole } from "@shared/types/database.types";
 
@@ -87,13 +87,26 @@ export class AuthUsecase {
       role: 'employer'
     });
 
-    await this.authRepository.createEmployerProfile(user.id, {
+    // Create employer profile and get back the profile id
+    const employerProfile = await this.authRepository.createEmployerProfile(user.id, {
       company_name: data.company_name,
       company_domain: data.company_domain,
       industry: data.industry,
       website: data.website,
       phone: data.phone
     });
+
+    // Determine plan — default to 'free' if not provided
+    const planName = data.selected_plan ?? 'free';
+
+    // Look up plan id from subscription_plans table
+    const plan = await this.authRepository.findPlanByName(planName);
+    if (!plan) {
+      throw new CustomError(ERROR_MESSAGES.SERVER_ERROR, HTTP_STATUS.INTERNAL_SERVER_ERROR);
+    }
+
+    // Create subscription record
+    await this.authRepository.createEmployerSubscription(employerProfile.id, plan.id);
   }
 
   async login(data: LoginInputDTO): Promise<LoginOutputDTO> {

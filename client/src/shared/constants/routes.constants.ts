@@ -15,10 +15,14 @@ export const ROUTES = {
   EMPLOYER: {
     DASHBOARD: '/employer/dashboard',
     JOBS: '/employer/jobs',
-    APPLICANTS: '/employer/applicants',
-    PROFILE: '/employer/profile',
+    JOB_CREATE: '/employer/jobs/create',
+    JOB_EDIT: '/employer/jobs/:id/edit',
+    APPLICANTS: '/employer/jobs/:id/applicants',
     SUBSCRIPTION: '/employer/subscription',
+    PROFILE: '/employer/profile',
+    VERIFICATION: '/employer/verification',
   },
+
   ADMIN: {
     DASHBOARD: '/admin/dashboard',
     EMPLOYERS: '/admin/employers',

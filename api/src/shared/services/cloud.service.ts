@@ -11,7 +11,7 @@ export class CloudinarySignatureService implements ICloudService {
 
         const signature = cloudinary.utils.api_sign_request({
             timestamp,
-            folder
+            folder,
         }, cloudinary.config().api_secret!)
 
         return {

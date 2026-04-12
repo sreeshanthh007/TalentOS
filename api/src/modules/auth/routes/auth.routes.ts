@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { Resolver } from '@di/resolver';
+import { verifyAuth } from '@shared/middlewares/auth.middleware';
 
 const router = Router();
 
@@ -8,6 +9,6 @@ router.post('/register/employer', (req, res, next) => Resolver.authController.re
 router.post('/login', (req, res, next) => Resolver.authController.login(req, res, next));
 router.post('/refresh-token', (req, res, next) => Resolver.authController.refreshToken(req, res, next));
 router.get('/cloudinary-signature', (req, res, next) => Resolver.authController.getCloudinarySignature(req, res, next));
-router.post('/logout', (req, res, next) => Resolver.authController.logout(req, res, next));
+router.post('/logout', verifyAuth, (req, res, next) => Resolver.authController.logout(req, res, next));
 
 export { router as authRouter };

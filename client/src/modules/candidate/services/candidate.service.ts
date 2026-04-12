@@ -1,4 +1,5 @@
 import { axiosInstance } from '@/shared/utils/axiosInstance'
+import { API_ENDPOINTS } from '@/shared/constants/api.routes'
 import { 
   type ApiResponse, 
   type CandidateUser, 
@@ -10,21 +11,20 @@ import {
 
 // Profile
 export async function getCandidateProfileApi(): Promise<ApiResponse<CandidateUser>> {
-  const response = await axiosInstance.get<ApiResponse<CandidateUser>>('/api/v1/candidate/profile')
+  const response = await axiosInstance.get<ApiResponse<CandidateUser>>(API_ENDPOINTS.CANDIDATE.PROFILE)
   return response.data
 }
 
 export async function updateCandidateProfileApi(
   data: UpdateCandidateProfilePayload
 ): Promise<ApiResponse<CandidateUser>> {
-  const response = await axiosInstance.put<ApiResponse<CandidateUser>>('/api/v1/candidate/profile', data)
+  const response = await axiosInstance.put<ApiResponse<CandidateUser>>(API_ENDPOINTS.CANDIDATE.PROFILE, data)
   return response.data
 }
 
 export async function uploadAvatarApi(file: File): Promise<ApiResponse<{ avatar_url: string }>> {
-  // 1. Get signature
   const sigRes = await axiosInstance.get<ApiResponse<{ timestamp: number; signature: string; folder: string; apiKey: string; cloudName: string }>>(
-    '/api/v1/auth/cloudinary-signature?folder=avatars'
+    `${API_ENDPOINTS.AUTH.CLOUDINARY_SIGNATURE}?folder=avatars`
   )
   const { timestamp, signature, folder, apiKey, cloudName } = sigRes.data.data
 
@@ -36,14 +36,16 @@ export async function uploadAvatarApi(file: File): Promise<ApiResponse<{ avatar_
   formData.append('signature', signature)
   formData.append('folder', folder)
 
-  const cloudRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+  const uploadUrl = `${import.meta.env.VITE_CLOUDINARY_UPLOAD_URL}/${cloudName}/image/upload`
+  
+  const cloudRes = await fetch(uploadUrl, {
     method: 'POST',
     body: formData
   })
   const cloudData = await cloudRes.json()
 
   // 3. Update profile avatar
-  const patchRes = await axiosInstance.patch<ApiResponse<{ avatar_url: string }>>('/api/v1/candidate/profile/avatar', {
+  const patchRes = await axiosInstance.patch<ApiResponse<{ avatar_url: string }>>(API_ENDPOINTS.CANDIDATE.UPDATE_AVATAR, {
     avatar_url: cloudData.secure_url
   })
   
@@ -52,12 +54,12 @@ export async function uploadAvatarApi(file: File): Promise<ApiResponse<{ avatar_
 
 // Applications
 export async function getMyApplicationsApi(): Promise<ApiResponse<Application[]>> {
-  const response = await axiosInstance.get<ApiResponse<Application[]>>('/api/v1/candidate/applications')
+  const response = await axiosInstance.get<ApiResponse<Application[]>>(API_ENDPOINTS.CANDIDATE.APPLICATIONS)
   return response.data
 }
 
 export async function getMyShortlistedApi(): Promise<ApiResponse<Application[]>> {
-  const response = await axiosInstance.get<ApiResponse<Application[]>>('/api/v1/candidate/shortlisted')
+  const response = await axiosInstance.get<ApiResponse<Application[]>>(API_ENDPOINTS.CANDIDATE.SHORTLISTED)
   return response.data
 }
 
@@ -65,7 +67,7 @@ export async function applyForJobApi(
   jobId: string,
   resumeUrl: string
 ): Promise<ApiResponse<Application>> {
-  const response = await axiosInstance.post<ApiResponse<Application>>('/api/v1/applications', {
+  const response = await axiosInstance.post<ApiResponse<Application>>(API_ENDPOINTS.APPLICATIONS.APPLY, {
     job_id: jobId,
     resume_url: resumeUrl
   })
@@ -76,6 +78,7 @@ export async function applyForJobApi(
 export async function generateResumeContentApi(
   input: ResumeBuilderInput
 ): Promise<ApiResponse<ResumeBuilderOutput>> {
-  const response = await axiosInstance.post<ApiResponse<ResumeBuilderOutput>>('/api/v1/candidate/resume/generate', input)
+  const response = await axiosInstance.post<ApiResponse<ResumeBuilderOutput>>(API_ENDPOINTS.CANDIDATE.RESUME_GENERATE, input)
   return response.data
 }
+

@@ -89,6 +89,7 @@ export type EmployerUser = BaseUser & {
   industry: string | null
   website: string | null
   phone: string | null
+  address: string | null
   verification_status: 'pending' | 'submitted' | 'approved' | 'rejected'
 }
 
@@ -150,6 +151,7 @@ export type Job = {
   status: 'draft' | 'active' | 'closed' | 'expired'
   source: string
   views_count: number
+  applications_count?: number
   created_at: string
   updated_at: string
   employer?: {
@@ -162,6 +164,88 @@ export type Job = {
     icon: string
   }
 }
+
+export type EmployerStats = {
+  active_jobs: number
+  total_applications: number
+  shortlisted_candidates: number
+  hired_candidates: number
+}
+
+export type Applicant = {
+  id: string           // application id
+  job_id: string
+  candidate_id: string
+  status: 'applied' | 'shortlisted' | 'interviewing' | 'offered' | 'hired' | 'rejected'
+  star_rating: number | null
+  employer_notes: string | null
+  applied_at: string
+  updated_at: string
+  resume_url: string | null
+  candidate: {
+    id: string
+    full_name: string | null
+    email: string
+    phone: string | null
+    avatar_url: string | null
+    location: string | null
+    skills: string[]
+    resume_url: string | null
+  }
+}
+
+export type EmployerDocument = {
+  id: string
+  employer_id: string
+  document_type: 'pan' | 'incorporation_certificate' | 'other'
+  file_url: string
+  file_name: string | null
+  uploaded_at: string
+}
+
+export type EmployerSubscription = {
+  id: string
+  employer_id: string
+  status: 'active' | 'expired' | 'cancelled'
+  started_at: string
+  expires_at: string | null
+  plan: {
+    id: string
+    name: string
+    display_name: string
+    price_monthly: number
+    job_listing_limit: number
+    features: string[]
+  }
+}
+
+export type CreateJobPayload = {
+  title: string
+  description: string
+  requirements: string
+  location: string
+  job_type: 'full_time' | 'part_time' | 'contract' | 'internship' | 'remote' | 'hybrid'
+  salary_min: number | null
+  salary_max: number | null
+  experience_years: number | null
+  category_id: string | null
+  status: 'draft' | 'active'
+}
+
+export type UpdateJobPayload = Partial<CreateJobPayload>
+
+export type UpdateApplicationStatusPayload = {
+  status: 'applied' | 'shortlisted' | 'interviewing' | 'offered' | 'hired' | 'rejected'
+  star_rating?: number
+  employer_notes?: string
+}
+
+export type UploadDocumentPayload = {
+  document_type: 'pan' | 'incorporation_certificate' | 'other'
+  file_url: string
+  file_name: string
+}
+
 
 export type JobCategory = {
   id: string
