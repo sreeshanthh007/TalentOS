@@ -4,13 +4,13 @@ import {
   registerEmployerSchema, 
   loginSchema, 
   refreshTokenSchema 
-} from '../validators/auth.validator';
+} from '@modules/auth/validators/auth.validator';
 import { asyncHandler } from '@shared/utils/asyncHandler';
 import { HTTP_STATUS } from '@shared/constants/statusCodes.constants';
 import { ERROR_MESSAGES, MESSAGES } from '@shared/constants/messages.constants';
-import { AuthUsecase } from '../usecases/auth.usecase';
+import { AuthUsecase } from '@modules/auth/usecases/auth.usecase';
 import { setAuthCookies, updateCookieWithAccessToken, clearAuthCookie } from '@shared/utils/cookie.util';
-import { ICloudService } from '../interfaces/ICloudservice';
+import { ICloudService } from '@modules/auth/interfaces/ICloudservice';
 import { CustomRequest } from '@shared/middlewares/auth.middleware';
 
 export class AuthController {
@@ -97,7 +97,14 @@ export class AuthController {
 
   logout = asyncHandler(async (req: Request, res: Response) => {
     const role = (req as CustomRequest).user?.role;
- 
+    
+    if (!role) {
+      return res.status(HTTP_STATUS.OK).json({
+        success: true,
+        message: "Logged out (no active session)"
+      });
+    }
+
     const accessToken = req.cookies[`${role}_access_token`];
     const refreshToken = req.cookies[`${role}_refresh_token`];
 
@@ -111,5 +118,6 @@ export class AuthController {
       message: "Logged out successfully"
     });
   });
+
 }
 

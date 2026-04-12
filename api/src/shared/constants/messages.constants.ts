@@ -18,9 +18,22 @@ export const MESSAGES = {
     NOT_FOUND: "Category not found"
   },
   EMPLOYER: {
-    PROFILE_UPDATE_SUCCESS: "Employer profile updated successfully",
-    NOT_FOUND: "Employer not found"
+    PROFILE_UPDATED: "Employer profile updated successfully",
+    NOT_FOUND: "Employer not found",
+    JOB_LIMIT_REACHED: "Job limit reached for your plan",
+    STAR_RATING_INVALID: "Star rating must be between 1 and 5",
+    SUBSCRIPTION_NOT_FOUND: "No active subscription found",
+    VERIFICATION_DOCS_REQUIRED: "Please upload both PAN and Incorporation Certificate",
+    JOB_CREATED: "Job posted successfully",
+    JOB_UPDATED: "Job updated successfully",
+    JOB_DELETED: "Job deleted successfully",
+    STATUS_UPDATED: "Application status updated",
+    DOCUMENT_UPLOADED: "Document uploaded successfully",
+    VERIFICATION_SUBMITTED: "Verification request submitted",
+    DOCUMENT_TYPE_ERROR: "Only PDF and image files are accepted"
   },
+
+
   CANDIDATE: {
     PROFILE_FETCH_SUCCESS: "Profile fetched successfully",
     PROFILE_UPDATE_SUCCESS: "Candidate profile updated successfully",
@@ -53,4 +66,7 @@ export const ERROR_MESSAGES = {
   BAD_REQUEST: "Bad Request",
   COMPANY_EMAIL: "Please use your company email address",
   FOLDER_NOT_FOUND: "Folder not found",
+  AI_API_KEY_MISSING: "AI API key is missing",
+  RESUME_GENERATION_FAILED: "Failed to generate resume content",
 };
+

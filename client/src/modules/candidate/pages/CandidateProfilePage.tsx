@@ -37,18 +37,16 @@ const CandidateProfilePage: React.FC = () => {
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
   const { mutate: updateProfile, isPending: isUpdating } = useUpdateCandidateProfile()
 
-  // Sync profile to Redux when fetched (important for refresh persistence)
+
   React.useEffect(() => {
     if (profile) {
       dispatch(candidateLogin(profile as CandidateUser))
     }
   }, [profile, dispatch])
 
-  // Tab 2 & 3 local state for dynamic entries
   const [education, setEducation] = useState<Education[]>([])
   const [experience, setExperience] = useState<Experience[]>([])
 
-  // Load initial data for education/experience when profile is fetched
   React.useEffect(() => {
     if (profile) {
       setEducation(profile.education || [])
@@ -63,6 +61,7 @@ const CandidateProfilePage: React.FC = () => {
     try {
       setIsUploadingAvatar(true)
       const res = await uploadAvatarApi(file)
+      console.log("res",res)
       updateProfile({ avatar_url: res.data.avatar_url })
       toast.success('Avatar updated successfully')
     } catch (error) {

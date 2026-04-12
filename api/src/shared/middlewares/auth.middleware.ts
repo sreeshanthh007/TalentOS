@@ -21,7 +21,6 @@ export interface CustomRequest extends Request {
 
 const extractToken = (req: Request): { access_token: string; refresh_token: string } | null => {
   const basePath = req.baseUrl.split("/");
-
   const userType = ROLE_MAP[basePath[3]];
 
   if (["admin", "employer", "candidate"].includes(userType)) {
@@ -29,6 +28,15 @@ const extractToken = (req: Request): { access_token: string; refresh_token: stri
       access_token: req.cookies[`${userType}_access_token`] || null,
       refresh_token: req.cookies[`${userType}_refresh_token`] || null,
     };
+  }
+
+  // Fallback for auth routes where role is not in the URL
+  for (const role of ["candidate", "employer", "admin"]) {
+    const access_token = req.cookies[`${role}_access_token`];
+    const refresh_token = req.cookies[`${role}_refresh_token`];
+    if (access_token) {
+      return { access_token, refresh_token: refresh_token || null };
+    }
   }
 
   return null;
@@ -42,7 +50,7 @@ const isBlacklisted = async (token: string): Promise<boolean> => {
 export const verifyAuth = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const token = extractToken(req);
-    logger.info("token is",token)
+
     if (!token || !token.access_token) {
       res.status(HTTP_STATUS.UNAUTHORIZED).json({ 
         success: false,
@@ -126,7 +134,7 @@ export const decodeToken = async (req: Request, res: Response, next: NextFunctio
 
     next();
   } catch (error: any) {
-    console.log("failed to decode", error);
+    logger.error("failed to decode", error);
     res.status(HTTP_STATUS.UNAUTHORIZED).json({ 
       success: false,
       message: ERROR_MESSAGES.INVALID_TOKEN 

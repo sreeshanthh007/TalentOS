@@ -1,8 +1,8 @@
 import { axiosInstance } from '@/shared/utils/axiosInstance'
-import { MESSAGES } from '@/shared/constants/messages.constants'
+import { API_ENDPOINTS } from '@/shared/constants/api.routes'
 import { type ApiResponse } from '@/shared/types'
 
-type CloudinarySignature = {
+export type CloudinarySignature = {
   timestamp: number
   signature: string
   folder: string
@@ -17,34 +17,22 @@ type CloudinaryUploadResponse = {
   bytes: number
 }
 
-// Fetches signed credentials from backend
-export async function getCloudinarySignatureApi(folder: string): Promise<CloudinarySignature> {
+
+export async function getCloudinarySignatureApi(folder: string): Promise<ApiResponse<CloudinarySignature>> {
   const response = await axiosInstance.get<ApiResponse<CloudinarySignature>>(
-    `/api/v1/auth/cloudinary-signature?folder=${folder}`
+    `${API_ENDPOINTS.AUTH.CLOUDINARY_SIGNATURE}?folder=${folder}`
   )
-  return response.data.data
+  return response.data
 }
 
-// Uploads file directly to Cloudinary using signed credentials
-// Returns secure_url
-export async function uploadResumeToCloudinary(
+
+export async function uploadToCloudinary(
   file: File,
+  signatureData: CloudinarySignature,
   onProgress?: (percent: number) => void
 ): Promise<string> {
-  // 1. Validate file type
-  if (file.type !== 'application/pdf') {
-    throw new Error(MESSAGES.UPLOAD.RESUME_TYPE_ERROR)
-  }
+  const { timestamp, signature, folder, apiKey, cloudName } = signatureData
 
-  // 2. Validate file size (10MB = 10 * 1024 * 1024 bytes)
-  if (file.size > 10 * 1024 * 1024) {
-    throw new Error(MESSAGES.UPLOAD.RESUME_SIZE_ERROR)
-  }
-
-  // 3. Get signature from backend
-  const { timestamp, signature, folder, apiKey, cloudName } = await getCloudinarySignatureApi('resumes')
-
-  // 4. Build FormData for Cloudinary
   const formData = new FormData()
   formData.append('file', file)
   formData.append('api_key', apiKey)
@@ -52,7 +40,6 @@ export async function uploadResumeToCloudinary(
   formData.append('signature', signature)
   formData.append('folder', folder)
 
-  // 5. Upload directly to Cloudinary using fetch with progress tracking
   return new Promise<string>((resolve, reject) => {
     const xhr = new XMLHttpRequest()
     
@@ -68,15 +55,23 @@ export async function uploadResumeToCloudinary(
         const response = JSON.parse(xhr.responseText) as CloudinaryUploadResponse
         resolve(response.secure_url)
       } else {
-        reject(new Error(MESSAGES.UPLOAD.RESUME_ERROR))
+        reject(new Error('Cloudinary upload failed'))
       }
     })
 
-    xhr.addEventListener('error', () => {
-      reject(new Error(MESSAGES.UPLOAD.RESUME_ERROR))
-    })
-
+    xhr.addEventListener('error', () => reject(new Error('Cloudinary upload network error')))
     xhr.open('POST', `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`)
     xhr.send(formData)
   })
+}
+
+/**
+ * Maintained for backward compatibility if needed, but discouraged in favor of the generic uploader
+ */
+export async function uploadResumeToCloudinary(
+  file: File,
+  onProgress?: (percent: number) => void
+): Promise<string> {
+  const res = await getCloudinarySignatureApi('resumes')
+  return uploadToCloudinary(file, res.data, onProgress)
 }
