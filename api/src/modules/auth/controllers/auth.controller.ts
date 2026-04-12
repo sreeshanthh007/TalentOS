@@ -64,7 +64,7 @@ export class AuthController {
   });
 
   refreshToken = asyncHandler(async (req: Request, res: Response) => {
-    const role = req.body.role || 'candidate';
+    const role = req.body?.role 
     const refreshToken = req.cookies[`${role}_refresh_token`];
 
     const validatedData = refreshTokenSchema.parse({ refreshToken });

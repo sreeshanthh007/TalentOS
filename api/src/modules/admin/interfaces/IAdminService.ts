@@ -1,2 +1,2 @@
-﻿export interface IAdminService {
+export interface IAdminService {
 }

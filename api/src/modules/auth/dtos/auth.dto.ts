@@ -17,6 +17,7 @@ export interface RegisterEmployerDTO {
   website?: string;
   phone?: string;
   selected_plan?: 'free' | 'premium' | 'enterprise';
+  plan_id?: string;
 }
 
 export interface LoginInputDTO {

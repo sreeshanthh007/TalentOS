@@ -1,2 +1,2 @@
-﻿export interface IJobRepository {
+export interface IJobRepository {
 }

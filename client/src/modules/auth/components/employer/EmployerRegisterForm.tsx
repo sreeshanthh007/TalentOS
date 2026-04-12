@@ -1,21 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useFormik } from 'formik';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Eye, EyeOff } from 'lucide-react';
 import { employerValidationSchema } from '@/shared/validators/auth.validators';
 import { useMultiStepForm } from '@/modules/auth/hooks/useMultiStepForm';
-import { plans } from '@/modules/auth/constants/auth.constants';
 import { MultiStepProgress } from '../MultiStepProgress';
 import { StepWrapper } from '../StepWrapper';
 import { FormNavigation } from '../FormNavigation';
-import type { EmployerRegisterValues } from '@/shared/types';
+import type { EmployerRegisterValues, SubscriptionPlan } from '@/shared/types';
 
 interface EmployerRegisterFormProps {
   onSubmit: (values: EmployerRegisterValues) => void;
   isLoading?: boolean;
+  plans: SubscriptionPlan[];
 }
 
-export const EmployerRegisterForm: React.FC<EmployerRegisterFormProps> = ({ onSubmit, isLoading }) => {
+export const EmployerRegisterForm: React.FC<EmployerRegisterFormProps> = ({ onSubmit, isLoading, plans }) => {
   const [showPassword, setShowPassword] = useState(false);
 
   const {
@@ -43,13 +43,26 @@ export const EmployerRegisterForm: React.FC<EmployerRegisterFormProps> = ({ onSu
       website: '',
       phone: '',
       selected_plan: 'free',
+      plan_id: '',
     },
     validationSchema: employerValidationSchema,
-    onSubmit: (values) => {
+    onSubmit: (values, { setSubmitting }) => {
       if (!isLastStep) return;
       onSubmit(values);
+      setSubmitting(false);
     },
   });
+
+  // Set default plan_id when plans are loaded
+  useEffect(() => {
+    if (plans.length > 0 && !formik.values.plan_id) {
+      const freePlan = plans.find(p => p.name === 'free');
+      if (freePlan) {
+        formik.setFieldValue('plan_id', freePlan.id);
+        formik.setFieldValue('selected_plan', 'free');
+      }
+    }
+  }, [plans, formik]);
 
   return (
     <>
@@ -189,15 +202,18 @@ export const EmployerRegisterForm: React.FC<EmployerRegisterFormProps> = ({ onSu
                   <motion.div
                     key={plan.id}
                     whileHover={{ y: -4, boxShadow: "0 10px 25px -5px rgba(20, 184, 166, 0.1), 0 8px 10px -6px rgba(20, 184, 166, 0.1)" }}
-                    className={`p-5 flex flex-col rounded-xl border-2 cursor-pointer transition-colors ${formik.values.selected_plan === plan.id ? 'border-teal-500 bg-teal-500/10' : 'border-teal-900/30 bg-[#0a2329]'}`}
-                    onClick={() => formik.setFieldValue('selected_plan', plan.id)}
+                    className={`p-5 flex flex-col rounded-xl border-2 cursor-pointer transition-colors ${formik.values.selected_plan === plan.name ? 'border-teal-500 bg-teal-500/10' : 'border-teal-900/30 bg-[#0a2329]'}`}
+                    onClick={() => {
+                      formik.setFieldValue('selected_plan', plan.name);
+                      formik.setFieldValue('plan_id', plan.id);
+                    }}
                   >
-                    <h4 className="text-lg font-bold">{plan.name}</h4>
-                    <p className="text-2xl text-teal-400 my-2 font-bold">{plan.price}</p>
+                    <h4 className="text-lg font-bold capitalize">{plan.display_name}</h4>
+                    <p className="text-2xl text-teal-400 my-2 font-bold">${plan.price_monthly}/mo</p>
                     <ul className="text-sm text-gray-400 mt-2 space-y-1 mb-4 flex-grow">
                       {plan.features.map(f => <li key={f}>• {f}</li>)}
                     </ul>
-                    {plan.id !== 'free' && (
+                    {plan.name !== 'free' && (
                       <button type="button" className="mt-auto text-xs text-teal-300 hover:text-teal-200 underline text-left">
                         Contact Sales
                       </button>

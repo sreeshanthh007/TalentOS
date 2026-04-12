@@ -11,4 +11,8 @@ export class PublicUseCase {
     async getAllCategories(): Promise<CategoryModel[]> {
         return this.publicRepository.getAllCategories();
     }
+
+    async getPlans() {
+        return this.publicRepository.getPlans();
+    }
 }

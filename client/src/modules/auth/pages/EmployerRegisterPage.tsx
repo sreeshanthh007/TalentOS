@@ -12,6 +12,7 @@ import { ROUTES } from '@/shared/constants/routes.constants';
 import { setSession } from '@/shared/utils/session';
 import { pageVariants } from '@/shared/animations/auth.animations';
 import { EmployerRegisterForm } from '../components/employer/EmployerRegisterForm';
+import { usePlans } from '../hooks/usePlans';
 
 const EmployerRegisterPage: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -47,6 +48,9 @@ const EmployerRegisterPage: React.FC = () => {
     });
   };
 
+  const { data: plansData } = usePlans();
+  const plans = plansData?.data || [];
+
   return (
     <div className="min-h-screen bg-[#0a2329] text-white flex flex-col items-center justify-center p-4">
       <motion.div
@@ -61,7 +65,11 @@ const EmployerRegisterPage: React.FC = () => {
           <p className="text-gray-400">Create your employer account</p>
         </div>
 
-        <EmployerRegisterForm onSubmit={handleRegisterSubmit} isLoading={isRegistering || isLoggingIn} />
+        <EmployerRegisterForm 
+          onSubmit={handleRegisterSubmit} 
+          isLoading={isRegistering || isLoggingIn} 
+          plans={plans}
+        />
         
         <div className="mt-6 text-center text-gray-400">
           Already have an account? <Link to={ROUTES.AUTH.LOGIN} className="text-teal-400 hover:underline">Log in</Link>

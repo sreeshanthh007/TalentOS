@@ -46,7 +46,20 @@ export const MESSAGES = {
   },
   ADMIN: {
     ACTION_SUCCESS: "Admin action completed successfully",
-    UNAUTHORIZED: "Admin access required"
+    UNAUTHORIZED: "Admin access required",
+    EMPLOYER_DELETED: "Employer deleted successfully",
+    STATUS_UPDATED: "Status updated successfully",
+    CANDIDATE_DELETED: "Candidate deleted successfully",
+    USER_BLOCK_UPDATED: "User block status updated successfully",
+    INQUIRY_STATUS_UPDATED: "Inquiry status updated successfully",
+    PLAN_UPDATED: "Plan updated successfully",
+    MESSAGE_SENT: "Message sent successfully",
+    STATISTICS_FETCH_SUCCESS: "Statistics fetched successfully",
+    EMPLOYERS_FETCH_SUCCESS: "Employers fetched successfully",
+    CANDIDATES_FETCH_SUCCESS: "Candidates fetched successfully",
+    PLANS_FETCH_SUCCESS: "Subscription plans fetched successfully",
+    INQUIRIES_FETCH_SUCCESS: "Inquiries fetched successfully",
+    MESSAGES_FETCH_SUCCESS: "Messages fetched successfully"
   }
 };
 
@@ -61,6 +74,7 @@ export const ERROR_MESSAGES = {
   TOKEN_EXPIRED: "Token is expired",
   INVALID_TOKEN: "Token is invalid or expired",
   FORBIDDEN: "Forbidden access",
+  NOT_ALLOWED: "You are not allowed to access this resource",
   NOT_FOUND: "User not found",
   EMAIL_EXISTS: "User with this email already exists",
   BAD_REQUEST: "Bad Request",

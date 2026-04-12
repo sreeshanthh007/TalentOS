@@ -1,13 +1,20 @@
-import { Request, Response, NextFunction } from 'express';
-import { CustomError } from '@shared/utils/CustomError';
-import { HTTP_STATUS } from '@shared/constants/statusCodes.constants';
-import { MESSAGES } from '@shared/constants/messages.constants';
+import { Request, Response, NextFunction } from 'express'
+import { HTTP_STATUS } from '@shared/constants/statusCodes.constants'
+import { ERROR_MESSAGES } from '@shared/constants/messages.constants'
+import { CustomRequest } from './auth.middleware'
 
-export const roleMiddleware = (...roles: Array<'candidate' | 'employer' | 'admin'>) => {
-  return (req: Request, res: Response, next: NextFunction): void => {
-    if (!req.user || !roles.includes(req.user.role)) {
-      throw new CustomError(MESSAGES.AUTH.FORBIDDEN, HTTP_STATUS.FORBIDDEN);
+export const roleMiddleware = (...allowedRoles: string[]) => {
+    return (req: Request, res: Response, next: NextFunction) => {
+        const user = (req as CustomRequest).user
+
+        if (!user || !allowedRoles.includes(user.role)) {
+            res.status(HTTP_STATUS.FORBIDDEN).json({
+                success: false,
+                message: ERROR_MESSAGES.NOT_ALLOWED,
+                user: user ? user.role : ""
+            })
+            return
+        }
+        next()
     }
-    next();
-  };
-};
+}

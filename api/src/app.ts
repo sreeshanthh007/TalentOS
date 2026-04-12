@@ -9,8 +9,8 @@ import { ErrorMiddleware } from '@shared/middlewares/error.middleware';
 import { authRouter } from '@modules/auth/routes/auth.routes';
 import publicRouter from '@modules/public/routes/public.routes';
 import { candidatesRouter, candidateApplicationsRouter } from '@modules/candidates/routes/candidates.routes';
-import { employerRouter } from '@modules/employer/routes/employer.routes';
-
+import { employerRouter } from '@modules/employers/routes/employer.routes';
+import { adminRouter } from '@modules/admin/routes/admin.routes';
 
 
 import { logger } from '@shared/utils/logger';
@@ -51,8 +51,10 @@ export class App {
     this.app.use('/api/v1', publicRouter);
     this.app.use('/api/v1/candidate', candidatesRouter);
     this.app.use('/api/v1/employer', employerRouter);
+    this.app.use('/api/v1/admin', adminRouter);
     this.app.use('/api/v1/applications', candidateApplicationsRouter);
   }
+
 
 
   private initErrorHandler(): void {

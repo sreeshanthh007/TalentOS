@@ -29,7 +29,7 @@ export const SubscriptionCard: React.FC<SubscriptionCardProps> = ({ subscription
       {/* Decorative Gradient */}
       <div className="absolute top-0 right-0 w-32 h-32 bg-teal-500/10 blur-3xl -z-10" />
 
-      <div className="flex justify-between items-start mb-6">
+      <div className="flex justify-between items-start mb-6"> 
         <div>
           <span className={cn(
             "px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border",

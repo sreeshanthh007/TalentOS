@@ -21,7 +21,7 @@ export const RecentApplications: React.FC<RecentApplicationsProps> = ({ applicat
       </div>
 
       <div className="space-y-4">
-        {applications.slice(0, 5).map((app) => (
+        {applications.slice(0, 6).map((app) => (
           <motion.div 
             key={app.id}
             initial={{ opacity: 0, y: 10 }}

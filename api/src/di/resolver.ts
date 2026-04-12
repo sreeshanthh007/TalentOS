@@ -2,7 +2,8 @@ import { UseCaseRegistry } from './usecase.registry';
 import { AuthController } from '@modules/auth/controllers/auth.controller';
 import { PublicController } from '@modules/public/controllers/public.controller';
 import { CandidatesController } from '@modules/candidates/controllers/candidates.controller';
-import { EmployerController } from '@modules/employer/controllers/employer.controller';
+import { EmployerController } from '@modules/employers/controllers/employer.controller';
+import { AdminController } from '@modules/admin/controllers/admin.controller';
 import { JwtService } from '@shared/services/jwt.service';
 import { BcryptService } from '@shared/services/bcrypt.service';
 import { CloudinarySignatureService } from '@shared/services/cloud.service';
@@ -13,6 +14,7 @@ export class Resolver {
   public static publicController: PublicController;
   public static candidatesController: CandidatesController;
   public static employerController: EmployerController;
+  public static adminController: AdminController;
   public static tokenService: JwtService;
   public static bcryptService: BcryptService;
   public static cloudinarySignatureService: CloudinarySignatureService;
@@ -34,6 +36,8 @@ export class Resolver {
     this.publicController = new PublicController(UseCaseRegistry.publicUseCase);
     this.candidatesController = new CandidatesController(UseCaseRegistry.candidateUseCase);
     this.employerController = new EmployerController(UseCaseRegistry.employerUseCase);
+    this.adminController = new AdminController(UseCaseRegistry.adminUsecase);
   }
 
 }
+

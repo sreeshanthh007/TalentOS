@@ -10,8 +10,12 @@ import type {
   EmployerSubscription, 
   EmployerUser, 
   UploadDocumentPayload, 
-  EmployerDocument 
+  EmployerDocument,
+  Inquiry,
+  Message,
+  SendMessagePayload
 } from '@/shared/types'
+
 import { axiosInstance } from '@/shared/utils/axiosInstance'
 import { getCloudinarySignatureApi, uploadToCloudinary } from '@/modules/auth/services/cloudinary.service'
 
@@ -106,3 +110,24 @@ export async function submitVerificationApi(): Promise<ApiResponse<null>> {
   const res = await axiosInstance.post(`${BASE_PATH}/verification/submit`)
   return res.data
 }
+
+// Inquiries & Chat
+export async function getMyInquiriesApi(): Promise<ApiResponse<Inquiry[]>> {
+  const res = await axiosInstance.get(`${BASE_PATH}/inquiries`)
+  return res.data
+}
+
+export async function getInquiryMessagesApi(
+  inquiryId: string
+): Promise<ApiResponse<Message[]>> {
+  const res = await axiosInstance.get(`${BASE_PATH}/inquiries/${inquiryId}/messages`)
+  return res.data
+}
+
+export async function sendEmployerMessageApi(
+  data: SendMessagePayload
+): Promise<ApiResponse<Message>> {
+  const res = await axiosInstance.post(`${BASE_PATH}/messages`, data)
+  return res.data
+}
+

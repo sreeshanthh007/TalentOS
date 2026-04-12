@@ -1,6 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { Route, Routes } from 'react-router-dom'
-import { CandidateLayout } from '@/shared/layouts/DashboardLayouts'
+import { CandidateLayout } from '@/shared/layouts/CandidateLayout'
 import { ProtectedRoute } from '@/shared/components/ProtectedRoute'
 import PageTransition from '@/shared/components/PageTransition'
 import AppliedJobsPage from '@/modules/candidate/pages/AppliedJobsPage'

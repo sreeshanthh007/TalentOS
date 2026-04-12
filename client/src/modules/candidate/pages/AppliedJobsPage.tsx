@@ -7,6 +7,7 @@ import {
 import { Link } from 'react-router-dom'
 import { useMyApplications } from '../hooks/useMyApplications'
 import { ROUTES } from '@/shared/constants/routes.constants'
+import { useDebounce } from '@/shared/hooks/useDebounce'
 
 // Components
 import { ApplicationCard } from '../components/applications/ApplicationCard'
@@ -20,12 +21,13 @@ const AppliedJobsPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const { data: appsRes, isLoading } = useMyApplications()
   
+  const debouncedSearch = useDebounce(searchQuery, 500)
   const applications = appsRes?.data || []
 
   const filteredApplications = applications.filter(app => {
     const matchesTab = activeTab === 'All' || app.status.toLowerCase() === activeTab.toLowerCase()
-    const matchesSearch = (app.job?.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         (app.job?.employer?.company_name || '').toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesSearch = (app.job?.title || '').toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+                         (app.job?.employer?.company_name || '').toLowerCase().includes(debouncedSearch.toLowerCase())
     return matchesTab && matchesSearch
   })
 

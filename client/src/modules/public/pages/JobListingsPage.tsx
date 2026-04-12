@@ -18,7 +18,7 @@ export default function JobListingsPage() {
     category_id: searchParams.get('category_id') || '',
     source: searchParams.get('source') || '',
     page: 1,
-    limit: 12,
+    limit: 6,
   })
 
   const handleSearchChange = React.useCallback((val: string) => {
@@ -97,7 +97,7 @@ export default function JobListingsPage() {
                 <h3 className="text-2xl font-bold text-white mb-2">No jobs found</h3>
                 <p className="text-gray-400 mb-6">Try adjusting your search or filters to find what you're looking for.</p>
                 <button 
-                  onClick={() => setFilters({ search: '', job_type: '', category_id: '', source: '', page: 1, limit: 12 })}
+                  onClick={() => setFilters({ search: '', job_type: '', category_id: '', source: '', page: 1, limit: 6 })}
                   className="bg-teal-500 text-slate-900 font-bold px-6 py-2 rounded-lg hover:bg-teal-400 transition-colors"
                 >
                   Clear All Filters

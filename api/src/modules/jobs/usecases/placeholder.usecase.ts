@@ -1,1 +1,1 @@
-﻿export class PlaceholderUsecase { constructor() {} }
+export class PlaceholderUsecase { constructor() {} }
