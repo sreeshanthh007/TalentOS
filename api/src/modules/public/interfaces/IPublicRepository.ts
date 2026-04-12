@@ -1,9 +1,11 @@
 import { CategoryModel, CreateCategoryData, UpdateCategoryData } from "../models/category.model";
+import { SubscriptionPlanModel } from "@modules/employers/models/employer.model";
 
 
 export interface IPublicRepository {
 
     getAllCategories(): Promise<CategoryModel[]>
+    getPlans(): Promise<SubscriptionPlanModel[]>
     // getCategoryById(id: string): Promise<CategoryModel | null>
     // createCategory(data: CreateCategoryData): Promise<CategoryModel>
     // updateCategory(id: string, data: Partial<UpdateCategoryData>): Promise<CategoryModel>

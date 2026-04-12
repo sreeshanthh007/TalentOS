@@ -1,2 +1,2 @@
-﻿export interface IJobService {
+export interface IJobService {
 }

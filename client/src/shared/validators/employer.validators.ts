@@ -7,8 +7,14 @@ export const jobValidationSchema = Yup.object({
   location: Yup.string().required('Location is required'),
   job_type: Yup.string().required('Job type is required'),
   category_id: Yup.string().required('Please select a category'),
-  salary_min: Yup.number().nullable().transform((v, o) => o === '' ? null : v),
-  salary_max: Yup.number().nullable().transform((v, o) => o === '' ? null : v),
+  salary_min: Yup.number()
+    .nullable()
+    .transform((v, o) => o === '' ? null : v)
+    .min(0, 'Salary must be positive'),
+  salary_max: Yup.number()
+    .nullable()
+    .transform((v, o) => o === '' ? null : v)
+    .moreThan(Yup.ref('salary_min'), 'Maximum salary must be greater than minimum salary'),
   experience_years: Yup.number().nullable().transform((v, o) => o === '' ? null : v)
 })
 

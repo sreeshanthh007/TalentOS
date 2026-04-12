@@ -95,6 +95,7 @@ export const JobFormModal: React.FC<JobFormModalProps> = ({ isOpen, onClose, job
                       <option value="">Select Category</option>
                       {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                     </select>
+                    {formik.touched.category_id && formik.errors.category_id && <p className="text-red-400 text-[10px]">{formik.errors.category_id}</p>}
                  </div>
               </div>
 
@@ -145,27 +146,29 @@ export const JobFormModal: React.FC<JobFormModalProps> = ({ isOpen, onClose, job
                       <option value="remote">Remote</option>
                       <option value="hybrid">Hybrid</option>
                     </select>
+                    {formik.touched.job_type && formik.errors.job_type && <p className="text-red-400 text-[10px]">{formik.errors.job_type}</p>}
                  </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                 <div className="space-y-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div className="space-y-2">
                     <label className="text-xs font-bold text-teal-400 uppercase tracking-widest">Salary Min (k)</label>
                     <input
                       type="number"
                       {...formik.getFieldProps('salary_min')}
                       className="w-full bg-[#051114] border border-teal-800/30 rounded-xl px-4 py-3 text-white focus:border-teal-500 transition-all"
                     />
-                 </div>
-                 <div className="space-y-2">
+                    {formik.touched.salary_min && formik.errors.salary_min && <p className="text-red-400 text-[10px]">{formik.errors.salary_min}</p>}
+                  </div>
+                  <div className="space-y-2">
                     <label className="text-xs font-bold text-teal-400 uppercase tracking-widest">Salary Max (k)</label>
                     <input
                       type="number"
                       {...formik.getFieldProps('salary_max')}
                       className="w-full bg-[#051114] border border-teal-800/30 rounded-xl px-4 py-3 text-white focus:border-teal-500 transition-all"
                     />
-                 </div>
-                 <div className="space-y-2">
+                  </div>
+                  <div className="space-y-2">
                     <label className="text-xs font-bold text-teal-400 uppercase tracking-widest">Status</label>
                     <select
                       {...formik.getFieldProps('status')}
@@ -174,7 +177,7 @@ export const JobFormModal: React.FC<JobFormModalProps> = ({ isOpen, onClose, job
                       <option value="active">Active</option>
                       <option value="draft">Draft</option>
                     </select>
-                 </div>
+                  </div>
               </div>
 
               <button

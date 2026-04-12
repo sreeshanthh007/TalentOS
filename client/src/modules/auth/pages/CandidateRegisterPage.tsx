@@ -52,8 +52,9 @@ const CandidateRegisterPage: React.FC = () => {
       resume_url: '',
     },
     validationSchema: candidateValidationSchema,
-    onSubmit: (values) => {
+    onSubmit: (values, { setSubmitting }) => {
       handleRegisterSubmit(values);
+      setSubmitting(false);
     },
   });
 

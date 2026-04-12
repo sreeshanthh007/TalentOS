@@ -1,3 +1,3 @@
-﻿export class JobController {
+export class JobController {
   constructor() {}
 }

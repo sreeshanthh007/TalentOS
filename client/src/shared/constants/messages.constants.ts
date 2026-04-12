@@ -36,5 +36,18 @@ export const MESSAGES = {
     EDUCATION_ADDED: 'Education entry added',
     EXPERIENCE_ADDED: 'Experience entry added',
     CONFIRM_DELETE: 'Are you sure you want to remove this entry?',
+  },
+  ADMIN: {
+    EMPLOYER_BLOCKED: 'Employer has been blocked',
+    EMPLOYER_UNBLOCKED: 'Employer has been unblocked',
+    EMPLOYER_DELETED: 'Employer deleted successfully',
+    CANDIDATE_DELETED: 'Candidate deleted successfully',
+    CANDIDATE_BLOCKED: 'Candidate has been blocked',
+    PLAN_UPDATED: 'Plan updated successfully',
+    VERIFICATION_APPROVED: 'Employer verification approved',
+    VERIFICATION_REJECTED: 'Employer verification rejected',
+    MESSAGE_SENT: 'Message sent',
+    INQUIRY_RESOLVED: 'Inquiry marked as resolved',
   }
 } as const;
+

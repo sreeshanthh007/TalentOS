@@ -18,7 +18,7 @@ const EmployerDashboardPage: React.FC = () => {
   const navigate = useNavigate()
 
   const stats = statsRes?.data
-  const recentJobs = jobsRes?.data?.slice(0, 5) || []
+  const recentJobs = jobsRes?.data?.slice(0, 6) || []
   const planLimit = subRes?.data?.plan?.job_listing_limit
   const activeJobs = stats?.active_jobs || 0
 

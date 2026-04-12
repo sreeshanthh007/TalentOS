@@ -130,6 +130,7 @@ export type EmployerRegisterValues = {
   website: string
   phone: string
   selected_plan: 'free' | 'premium' | 'enterprise'
+  plan_id?: string
 }
 
 export type SessionData = {
@@ -288,3 +289,97 @@ export type ContactInquiryPayload = {
   message: string
   plan_interested: 'free' | 'premium' | 'enterprise'
 }
+
+export type AdminStats = {
+  total_employers: number
+  total_candidates: number
+  total_jobs: number
+  latest_jobs: Job[]
+}
+
+export type AdminEmployer = {
+  id: string
+  user_id: string
+  email: string
+  company_name: string
+  company_domain: string
+  industry: string | null
+  website: string | null
+  phone: string | null
+  verification_status: 'pending' | 'submitted' | 'approved' | 'rejected'
+  is_blocked: boolean
+  is_profile_complete: boolean
+  created_at: string
+  subscription?: {
+    plan_name: string
+    status: string
+  }
+  documents?: EmployerDocument[]
+}
+
+export type AdminCandidate = {
+  id: string
+  user_id: string
+  email: string
+  full_name: string | null
+  phone: string | null
+  avatar_url: string | null
+  location: string | null
+  skills: string[]
+  resume_url: string | null
+  is_blocked: boolean
+  created_at: string
+  average_rating?: number
+}
+
+export type SubscriptionPlan = {
+  id: string
+  name: 'free' | 'premium' | 'enterprise'
+  display_name: string
+  price_monthly: number
+  job_listing_limit: number
+  features: string[]
+  is_active: boolean
+}
+
+export type UpdatePlanPayload = {
+  price_monthly?: number
+  features?: string[]
+  display_name?: string
+}
+
+export type Inquiry = {
+  id: string
+  employer_id: string
+  plan_id: string | null
+  subject: string
+  initial_message: string
+  status: 'open' | 'in_progress' | 'resolved'
+  created_at: string
+  updated_at: string
+  employer?: {
+    company_name: string
+    email: string
+    industry: string | null
+  }
+  plan?: {
+    display_name: string
+  }
+  unread_count?: number
+}
+
+export type Message = {
+  id: string
+  inquiry_id: string
+  sender_role: 'admin' | 'employer'
+  sender_id: string
+  content: string
+  is_read: boolean
+  sent_at: string
+}
+
+export type SendMessagePayload = {
+  inquiry_id: string
+  content: string
+}
+

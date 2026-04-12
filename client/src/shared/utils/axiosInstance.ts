@@ -61,9 +61,10 @@ axiosInstance.interceptors.response.use(
     const message = error.response?.data?.message || ''
 
     if (error.response?.status === 401 && !originalRequest._retry) {
+      const isLoginRequest = originalRequest.url?.includes(API_ENDPOINTS.AUTH.LOGIN)
       const isRefreshTokenRequest = originalRequest.url?.includes(API_ENDPOINTS.AUTH.REFRESH_TOKEN)
       
-      if (isRefreshTokenRequest) {
+      if (isRefreshTokenRequest || isLoginRequest) {
         clearSession()
         handleLogout(role)
         toast.info(message || 'Session expired, please log in again')

@@ -11,10 +11,12 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.11.2",
+    "@supabase/supabase-js": "^2.103.0",
     "@tanstack/react-query": "^5.97.0",
     "axios": "^1.15.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
     "formik": "^2.4.9",
     "framer-motion": "^12.38.0",
     "lucide-react": "^1.8.0",

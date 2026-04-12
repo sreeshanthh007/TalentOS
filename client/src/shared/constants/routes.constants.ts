@@ -21,15 +21,20 @@ export const ROUTES = {
     SUBSCRIPTION: '/employer/subscription',
     PROFILE: '/employer/profile',
     VERIFICATION: '/employer/verification',
+    INQUIRIES: '/employer/inquiries',
+    CHAT: '/employer/inquiries/:id/chat',
   },
 
   ADMIN: {
     DASHBOARD: '/admin/dashboard',
     EMPLOYERS: '/admin/employers',
+    EMPLOYER_DETAIL: '/admin/employers/:id',
     CANDIDATES: '/admin/candidates',
     PLANS: '/admin/plans',
     INQUIRIES: '/admin/inquiries',
+    CHAT: '/admin/inquiries/:id/chat',
   },
+
   PUBLIC: {
     JOBS: '/jobs',
     JOB_DETAIL: '/jobs/:id',

@@ -45,6 +45,9 @@ export const CompanyInfoForm: React.FC<CompanyInfoFormProps> = ({ employer, onSu
               {...formik.getFieldProps('company_name')}
               className="w-full bg-[#0D4F4F]/20 border border-teal-800/30 rounded-2xl px-5 py-4 text-white focus:border-teal-500 transition-all outline-none"
             />
+            {formik.touched.company_name && formik.errors.company_name && (
+              <p className="text-red-400 text-[10px] mt-1 italic">{formik.errors.company_name as string}</p>
+            )}
          </div>
          <div className="space-y-2">
             <label className="text-[10px] font-black text-teal-400 uppercase tracking-widest flex items-center gap-2">
@@ -55,11 +58,13 @@ export const CompanyInfoForm: React.FC<CompanyInfoFormProps> = ({ employer, onSu
               className="w-full bg-[#0D4F4F]/20 border border-teal-800/30 rounded-2xl px-5 py-4 text-white focus:border-teal-500 transition-all outline-none"
             >
               <option value="">Select Industry</option>
-              <option value="tech">Technology</option>
-              <option value="finance">Finance</option>
-              <option value="healthcare">Healthcare</option>
-              <option value="education">Education</option>
+              {['Technology', 'Finance', 'Healthcare', 'Marketing', 'Education', 'Engineering', 'Legal', 'Operations', 'Other'].map(i => (
+                <option key={i} value={i}>{i}</option>
+              ))}
             </select>
+            {formik.touched.industry && formik.errors.industry && (
+              <p className="text-red-400 text-[10px] mt-1 italic">{formik.errors.industry as string}</p>
+            )}
          </div>
       </div>
 
@@ -73,6 +78,9 @@ export const CompanyInfoForm: React.FC<CompanyInfoFormProps> = ({ employer, onSu
               className="w-full bg-[#0D4F4F]/20 border border-teal-800/30 rounded-2xl px-5 py-4 text-white focus:border-teal-500 transition-all outline-none"
               placeholder="https://company.com"
             />
+            {formik.touched.website && formik.errors.website && (
+              <p className="text-red-400 text-[10px] mt-1 italic">{formik.errors.website as string}</p>
+            )}
          </div>
          <div className="space-y-2">
             <label className="text-[10px] font-black text-teal-400 uppercase tracking-widest flex items-center gap-2">
@@ -82,6 +90,9 @@ export const CompanyInfoForm: React.FC<CompanyInfoFormProps> = ({ employer, onSu
               {...formik.getFieldProps('phone')}
               className="w-full bg-[#0D4F4F]/20 border border-teal-800/30 rounded-2xl px-5 py-4 text-white focus:border-teal-500 transition-all outline-none"
             />
+            {formik.touched.phone && formik.errors.phone && (
+              <p className="text-red-400 text-[10px] mt-1 italic">{formik.errors.phone as string}</p>
+            )}
          </div>
       </div>
 
@@ -95,6 +106,9 @@ export const CompanyInfoForm: React.FC<CompanyInfoFormProps> = ({ employer, onSu
            className="w-full bg-[#0D4F4F]/20 border border-teal-800/30 rounded-2xl px-5 py-4 text-white focus:border-teal-500 transition-all outline-none resize-none"
            placeholder="Describe your company culture, mission and what you do..."
          />
+         {formik.touched.company_description && formik.errors.company_description && (
+           <p className="text-red-400 text-[10px] mt-1 italic">{formik.errors.company_description as string}</p>
+         )}
       </div>
 
       <div className="space-y-2">
@@ -105,6 +119,9 @@ export const CompanyInfoForm: React.FC<CompanyInfoFormProps> = ({ employer, onSu
            {...formik.getFieldProps('address')}
            className="w-full bg-[#0D4F4F]/20 border border-teal-800/30 rounded-2xl px-5 py-4 text-white focus:border-teal-500 transition-all outline-none"
          />
+         {formik.touched.address && formik.errors.address && (
+           <p className="text-red-400 text-[10px] mt-1 italic">{formik.errors.address as string}</p>
+         )}
       </div>
 
       <button

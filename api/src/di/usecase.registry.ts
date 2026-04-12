@@ -3,13 +3,15 @@ import { Resolver } from './resolver';
 import { AuthUsecase } from '@modules/auth/usecases/auth.usecase';
 import { PublicUseCase } from '@modules/public/usecases/public.usecase';
 import { CandidateUsecase } from '@modules/candidates/usecases/candidate.usecase';
-import { EmployerUsecase } from '@modules/employer/usecases/employer.usecase';
+import { EmployerUsecase } from '@modules/employers/usecases/employer.usecase';
+import { AdminUsecase } from '@modules/admin/usecases/admin.usecase';
 
 export class UseCaseRegistry {
   public static authUsecase: AuthUsecase;
   public static publicUseCase: PublicUseCase;
   public static candidateUseCase: CandidateUsecase;
   public static employerUseCase: EmployerUsecase;
+  public static adminUsecase: AdminUsecase;
 
   public static registerUseCases(): void {
     const authRepo = RepositoryRegistry.authRepository;
@@ -25,8 +27,10 @@ export class UseCaseRegistry {
     this.publicUseCase = new PublicUseCase(RepositoryRegistry.publicRepository);
     this.candidateUseCase = new CandidateUsecase(RepositoryRegistry.candidatesRepository, Resolver.aiService);
     this.employerUseCase = new EmployerUsecase(RepositoryRegistry.employerRepository);
+    this.adminUsecase = new AdminUsecase(RepositoryRegistry.adminRepository);
   }
 }
+
 
 
 

@@ -22,8 +22,9 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading }) => 
       role: 'candidate',
     },
     validationSchema: loginValidationSchema,
-    onSubmit: (values) => {
+    onSubmit: (values, { setSubmitting }) => {
       onSubmit(values);
+      setSubmitting(false);
     },
   });
 

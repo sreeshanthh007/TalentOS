@@ -65,4 +65,5 @@ export const employerValidationSchema = Yup.object({
   selected_plan: Yup.string()
     .oneOf(['free', 'premium', 'enterprise'])
     .required('This field is required'),
+  plan_id: Yup.string().optional(),
 })

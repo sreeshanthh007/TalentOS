@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react'
+import React, { useState } from 'react'
 import { Plus, Briefcase } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useMyJobs } from '../hooks/useMyJobs'
@@ -11,15 +11,20 @@ import { useNavigate } from 'react-router-dom'
 import { ROUTES } from '@/shared/constants/routes.constants'
 import { toast } from 'sonner'
 import { MESSAGES } from '@/shared/constants/messages.constants'
+import { ConfirmModal } from '@/shared/components/common/ConfirmModal'
 
 const JobManagementPage: React.FC = () => {
   const { data: jobsRes, isLoading } = useMyJobs()
   const { data: subRes } = useMySubscription()
-  const { mutate: deleteJob } = useDeleteJob()
+  const { mutate: deleteJob, isPending: isDeleting } = useDeleteJob()
   const navigate = useNavigate()
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedJob, setSelectedJob] = useState<Job | undefined>()
+  const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; id: string }>({
+     isOpen: false,
+     id: ''
+  })
 
   const jobs = jobsRes?.data || []
   const sub = subRes?.data
@@ -41,9 +46,13 @@ const JobManagementPage: React.FC = () => {
   }
 
   const handleDelete = (id: string) => {
-     if (window.confirm('Are you sure you want to delete this job listing?')) {
-       deleteJob(id)
-     }
+     setDeleteConfirm({ isOpen: true, id })
+  }
+
+  const confirmDelete = () => {
+     deleteJob(deleteConfirm.id, {
+        onSuccess: () => setDeleteConfirm({ isOpen: false, id: '' })
+     })
   }
 
   return (
@@ -98,6 +107,16 @@ const JobManagementPage: React.FC = () => {
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
         job={selectedJob} 
+      />
+
+      <ConfirmModal 
+        isOpen={deleteConfirm.isOpen}
+        onClose={() => setDeleteConfirm({ isOpen: false, id: '' })}
+        onConfirm={confirmDelete}
+        title="Delete Job Listing?"
+        message="This action is permanent and will remove all applications associated with this job."
+        confirmText="Delete Listing"
+        isLoading={isDeleting}
       />
     </div>
   )

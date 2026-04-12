@@ -1,5 +1,6 @@
 import { IPublicRepository } from "../interfaces/IPublicRepository";
 import { CategoryModel, CreateCategoryData, UpdateCategoryData } from "../models/category.model";
+import { SubscriptionPlanModel } from "@modules/employers/models/employer.model";
 import { supabaseClient } from "@shared/config/db.config";
 
 
@@ -15,6 +16,20 @@ export class PublicRepository implements IPublicRepository {
         }
 
         return data as CategoryModel[];
+    }
+
+    async getPlans(): Promise<SubscriptionPlanModel[]> {
+        const { data, error } = await supabaseClient
+            .from('subscription_plans')
+            .select('*')
+            .eq('is_active', true)
+            .order('price_monthly', { ascending: true });
+
+        if (error) {
+            throw error;
+        }
+
+        return data as SubscriptionPlanModel[];
     }
 
     // async getCategoryById(id: string): Promise<CategoryModel | null> {

@@ -7,12 +7,7 @@ import { ROUTES } from '@/shared/constants/routes.constants'
 import { pageVariants, staggerContainer, staggerItem } from '@/shared/animations/auth.animations'
 import { ContactInquiryForm } from '../components/ContactInquiryForm'
 
-const MOCK_PLANS = [
-  { id: 'free' as const, display_name: 'Starter', price_monthly: 0, job_listing_limit: 3, features: ['3 Active Job Listings', 'Basic Candidate Matching', 'Community Support'] },
-  { id: 'premium' as const, display_name: 'Growth', price_monthly: 199, job_listing_limit: 20, features: ['20 Active Job Listings', 'Advanced AI Matching pipeline', 'Priority Email Support', 'Custom Company Profile'] },
-  { id: 'enterprise' as const, display_name: 'Enterprise', price_monthly: 899, job_listing_limit: -1, features: ['Unlimited Job Listings', 'ATS Integrations', 'Dedicated Account Manager', 'White-labeled portal'] },
-]
-
+import { usePlans } from '@/modules/auth/hooks/usePlans'
 import { useCreateInquiry } from '../hooks/useCreateInquiry'
 import { useToast } from '@/shared/hooks/useToast'
 import type { ContactInquiryPayload } from '@/shared/types'
@@ -20,11 +15,13 @@ import type { ContactInquiryPayload } from '@/shared/types'
 export default function EmployersLandingPage() {
   const contactFormRef = useRef<HTMLDivElement>(null)
   const toast = useToast()
+  const { data: plansRes } = usePlans()
   const { mutate: createInquiry, isPending } = useCreateInquiry()
+
+  const plans = plansRes?.data || []
 
   const scrollToContact = (planId: string) => {
     contactFormRef.current?.scrollIntoView({ behavior: 'smooth' })
-    // In a full implementation, we'd pass the planId to the form state
   }
 
   const handleInquirySubmit = (values: ContactInquiryPayload, helpers: any) => {
@@ -145,11 +142,14 @@ export default function EmployersLandingPage() {
             <p className="text-gray-400">Only pay for what you need. Upgrade as you grow.</p>
           </div>
           <div className="grid md:grid-cols-3 gap-8 items-center max-w-5xl mx-auto">
-             {MOCK_PLANS.map(plan => (
+             {plans.map(plan => (
                <PricingCard 
                  key={plan.id} 
-                 plan={plan} 
-                 isPopular={plan.id === 'premium'}
+                 plan={{
+                   ...plan,
+                   id: plan.name as any // PricingCard expects specific string literals sometimes
+                 }} 
+                 isPopular={plan.name === 'premium'}
                  onContactSales={scrollToContact} 
                />
              ))}

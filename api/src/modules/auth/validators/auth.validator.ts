@@ -31,7 +31,9 @@ export const registerEmployerSchema = z.object({
   company_domain: z.string().min(1, "Company domain is required"),
   industry: z.string().optional(),
   website: z.string().url("Invalid website URL").optional().or(z.literal('')),
-  phone: z.string().optional()
+  phone: z.string().optional(),
+  selected_plan: z.enum(['free', 'premium', 'enterprise']).optional(),
+  plan_id: z.string().uuid("Invalid plan ID format").optional()
 });
 
 export const loginSchema = z.object({

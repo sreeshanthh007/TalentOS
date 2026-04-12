@@ -96,17 +96,21 @@ export class AuthUsecase {
       phone: data.phone
     });
 
-    // Determine plan — default to 'free' if not provided
-    const planName = data.selected_plan ?? 'free';
+    let planId = data.plan_id;
 
-    // Look up plan id from subscription_plans table
-    const plan = await this.authRepository.findPlanByName(planName);
-    if (!plan) {
-      throw new CustomError(ERROR_MESSAGES.SERVER_ERROR, HTTP_STATUS.INTERNAL_SERVER_ERROR);
+    if (!planId || planId === 'undefined') {
+      // Determine plan name — default to 'free' if not provided
+      const planName = data.selected_plan ?? 'free';
+      // Look up plan id from subscription_plans table
+      const plan = await this.authRepository.findPlanByName(planName);
+      if (!plan) {
+        throw new CustomError(ERROR_MESSAGES.SERVER_ERROR, HTTP_STATUS.INTERNAL_SERVER_ERROR);
+      }
+      planId = plan.id;
     }
 
     // Create subscription record
-    await this.authRepository.createEmployerSubscription(employerProfile.id, plan.id);
+    await this.authRepository.createEmployerSubscription(employerProfile.id, planId);
   }
 
   async login(data: LoginInputDTO): Promise<LoginOutputDTO> {
