@@ -36,12 +36,39 @@ export default function JobListingsPage() {
     if (filters.job_type) params.set('job_type', filters.job_type)
     if (filters.category_id) params.set('category_id', filters.category_id)
     if (filters.source) params.set('source', filters.source)
+    if (filters.page && filters.page > 1) params.set('page', filters.page.toString())
     
-    // Only update if params actually changed to avoid unnecessary navigation history entries
+    // Use replace: true to avoid cluttering history while typing/filtering
     if (params.toString() !== searchParams.toString()) {
-      setSearchParams(params)
+      setSearchParams(params, { replace: true })
     }
   }, [filters, setSearchParams, searchParams])
+
+  // Sync URL to State (e.g. on back/forward or manual URL edit)
+  useEffect(() => {
+    const search = searchParams.get('search') || ''
+    const job_type = searchParams.get('job_type') || ''
+    const category_id = searchParams.get('category_id') || ''
+    const source = searchParams.get('source') || ''
+    const page = Number(searchParams.get('page')) || 1
+
+    if (
+      search !== filters.search ||
+      job_type !== filters.job_type ||
+      category_id !== filters.category_id ||
+      source !== filters.source ||
+      page !== filters.page
+    ) {
+      setFilters(prev => ({
+        ...prev,
+        search,
+        job_type,
+        category_id,
+        source,
+        page
+      }))
+    }
+  }, [searchParams])
 
   const { data: jobsResp, isLoading: jobsLoading } = useJobs(filters)
   const { data: catResp } = useCategories()

@@ -11,6 +11,7 @@ const CandidateManagementPage = lazy(() => import('@/modules/admin/pages/Candida
 const PlanManagementPage = lazy(() => import('@/modules/admin/pages/PlanManagementPage'));
 const InquiriesPage = lazy(() => import('@/modules/admin/pages/InquiriesPage'));
 const AdminChatPage = lazy(() => import('@/modules/admin/pages/AdminChatPage'));
+const TestimonialsPage = lazy(() => import('@/modules/admin/pages/TestimonialsPage'));
 
 const AdminRoutes = () => {
   return (
@@ -31,6 +32,7 @@ const AdminRoutes = () => {
           <Route path="plans" element={<PageTransition><PlanManagementPage /></PageTransition>} />
           <Route path="inquiries" element={<PageTransition><InquiriesPage /></PageTransition>} />
           <Route path="inquiries/:id/chat" element={<PageTransition><AdminChatPage /></PageTransition>} />
+          <Route path="testimonials" element={<PageTransition><TestimonialsPage /></PageTransition>} />
         </Route>
       </Routes>
     </Suspense>

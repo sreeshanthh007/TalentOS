@@ -20,3 +20,12 @@ export type SendMessageDTO = {
 export type BlockUserDTO = {
   is_blocked: boolean
 }
+
+export type CreateTestimonialDTO = {
+  author_name: string
+  author_role?: string
+  content: string
+  rating: number
+  is_active?: boolean
+  avatar_url?: string
+}

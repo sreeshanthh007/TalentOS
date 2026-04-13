@@ -65,3 +65,15 @@ export type InquiryModel = {
     display_name: string
   }
 }
+
+export type TestimonialModel = {
+  id: string
+  author_name: string
+  author_role: string | null
+  avatar_url: string | null
+  content: string
+  rating: number
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}

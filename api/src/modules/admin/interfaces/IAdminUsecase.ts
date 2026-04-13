@@ -3,13 +3,15 @@ import {
   AdminEmployerModel, 
   AdminStatsModel, 
   InquiryModel, 
-  MessageModel 
+  MessageModel,
+  TestimonialModel
 } from '../models/admin.model'
 import { 
   UpdatePlanDTO, 
   SendMessageDTO, 
   UpdateVerificationDTO, 
-  UpdateInquiryStatusDTO 
+  UpdateInquiryStatusDTO,
+  CreateTestimonialDTO
 } from '../dtos/admin.dto'
 import { SubscriptionPlanModel } from '@modules/employers/models/employer.model'
 
@@ -41,4 +43,10 @@ export interface IAdminUsecase {
     data: SendMessageDTO, 
     senderRole: 'admin' | 'employer'
   ): Promise<MessageModel>
+  // Testimonials
+  getTestimonials(): Promise<TestimonialModel[]>
+  createTestimonial(data: CreateTestimonialDTO): Promise<TestimonialModel>
+  updateTestimonial(id: string, data: Partial<CreateTestimonialDTO>): Promise<TestimonialModel>
+  deleteTestimonial(id: string): Promise<void>
+  toggleTestimonialStatus(id: string, isActive: boolean): Promise<void>
 }

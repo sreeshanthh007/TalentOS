@@ -265,6 +265,15 @@ export type Testimonial = {
   is_active: boolean
 }
 
+export type CreateTestimonialPayload = {
+  author_name: string
+  author_role?: string
+  content: string
+  rating: number
+  is_active?: boolean
+  avatar_url?: string
+}
+
 export type JobFilters = {
   search: string
   job_type: string

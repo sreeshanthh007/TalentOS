@@ -8,10 +8,46 @@ import type {
   UpdatePlanPayload,
   Inquiry,
   Message,
-  SendMessagePayload
+  SendMessagePayload,
+  Testimonial,
+  CreateTestimonialPayload
 } from '@/shared/types'
 
 const BASE = '/api/v1/admin'
+
+// Testimonials
+export async function getAdminTestimonialsApi(): Promise<ApiResponse<Testimonial[]>> {
+  const response = await axiosInstance.get<ApiResponse<Testimonial[]>>(`${BASE}/testimonials`)
+  return response.data
+}
+
+export async function createTestimonialApi(
+  data: CreateTestimonialPayload
+): Promise<ApiResponse<Testimonial>> {
+  const response = await axiosInstance.post<ApiResponse<Testimonial>>(`${BASE}/testimonials`, data)
+  return response.data
+}
+
+export async function updateTestimonialApi(
+  id: string,
+  data: Partial<CreateTestimonialPayload>
+): Promise<ApiResponse<Testimonial>> {
+  const response = await axiosInstance.put<ApiResponse<Testimonial>>(`${BASE}/testimonials/${id}`, data)
+  return response.data
+}
+
+export async function deleteTestimonialApi(id: string): Promise<ApiResponse<null>> {
+  const response = await axiosInstance.delete<ApiResponse<null>>(`${BASE}/testimonials/${id}`)
+  return response.data
+}
+
+export async function toggleTestimonialApi(
+  id: string,
+  isActive: boolean
+): Promise<ApiResponse<null>> {
+  const response = await axiosInstance.patch<ApiResponse<null>>(`${BASE}/testimonials/${id}/toggle`, { is_active: isActive })
+  return response.data
+}
 
 // Stats
 export async function getAdminStatsApi(): Promise<ApiResponse<AdminStats>> {

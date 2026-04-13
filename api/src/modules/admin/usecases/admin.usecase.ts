@@ -5,15 +5,20 @@ import {
   AdminEmployerModel, 
   AdminStatsModel, 
   InquiryModel, 
-  MessageModel 
+  MessageModel,
+  TestimonialModel
 } from '../models/admin.model'
 import { 
   UpdatePlanDTO, 
   SendMessageDTO, 
   UpdateVerificationDTO, 
-  UpdateInquiryStatusDTO 
+  UpdateInquiryStatusDTO,
+  CreateTestimonialDTO
 } from '../dtos/admin.dto'
 import { SubscriptionPlanModel } from '@modules/employers/models/employer.model'
+import { CustomError } from '@shared/utils/CustomError'
+import { ERROR_MESSAGES } from '@shared/constants/messages.constants'
+import { HTTP_STATUS } from '@shared/constants/statusCodes.constants'
 
 export class AdminUsecase implements IAdminUsecase {
   constructor(private readonly adminRepo: IAdminRepository) {}
@@ -85,5 +90,35 @@ export class AdminUsecase implements IAdminUsecase {
     senderRole: 'admin' | 'employer'
   ): Promise<MessageModel> {
     return this.adminRepo.sendMessage(senderId, data, senderRole)
+  }
+
+  // Testimonials
+  async getTestimonials(): Promise<TestimonialModel[]> {
+    return this.adminRepo.getTestimonials()
+  }
+
+  async createTestimonial(data: CreateTestimonialDTO): Promise<TestimonialModel> {
+    if (!data.author_name || !data.content) {
+      throw new CustomError(ERROR_MESSAGES.VALIDATION_ERROR, HTTP_STATUS.BAD_REQUEST)
+    }
+    if (data.rating < 1 || data.rating > 5) {
+      throw new CustomError(ERROR_MESSAGES.VALIDATION_ERROR, HTTP_STATUS.BAD_REQUEST)
+    }
+    return this.adminRepo.createTestimonial(data)
+  }
+
+  async updateTestimonial(
+    id: string, 
+    data: Partial<CreateTestimonialDTO>
+  ): Promise<TestimonialModel> {
+    return this.adminRepo.updateTestimonial(id, data)
+  }
+
+  async deleteTestimonial(id: string): Promise<void> {
+    return this.adminRepo.deleteTestimonial(id)
+  }
+
+  async toggleTestimonialStatus(id: string, isActive: boolean): Promise<void> {
+    return this.adminRepo.toggleTestimonialStatus(id, isActive)
   }
 }

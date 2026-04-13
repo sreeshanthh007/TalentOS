@@ -10,7 +10,8 @@ import {
   LogOut,
   Menu,
   X,
-  UserCircle
+  UserCircle,
+  Star
 } from 'lucide-react'
 import { useAppSelector } from '@/store/hooks'
 import { ROUTES } from '@/shared/constants/routes.constants'
@@ -23,6 +24,7 @@ const adminSidebarItems = [
   { icon: Users, label: 'Candidates', path: ROUTES.ADMIN.CANDIDATES },
   { icon: CreditCard, label: 'Plans', path: ROUTES.ADMIN.PLANS },
   { icon: MessageSquare, label: 'Inquiries', path: ROUTES.ADMIN.INQUIRIES },
+  { icon: Star, label: 'Testimonials', path: ROUTES.ADMIN.TESTIMONIALS },
 ]
 
 export const AdminLayout: React.FC = () => {

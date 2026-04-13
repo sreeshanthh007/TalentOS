@@ -1,4 +1,4 @@
-﻿import React from 'react'
+import React from 'react'
 import { motion, useInView } from 'framer-motion'
 import { Link, useNavigate } from 'react-router-dom'
 import { Sparkles, ShieldCheck, BarChart3, TrendingUp } from 'lucide-react'
@@ -25,9 +25,11 @@ export default function HomePage() {
   const featuredJobs = jobsResp?.data || []
   const testimonials = testimonialsResp?.data || []
 
-  // const handleSearch = (term: string) => {
-  //   if (term) navigate(`${ROUTES.PUBLIC.JOBS}?search=${encodeURIComponent(term)}`)
-  // }
+  const handleSearch = (term: string) => {
+    if (term.trim()) {
+      navigate(`${ROUTES.PUBLIC.JOBS}?search=${encodeURIComponent(term.trim())}`)
+    }
+  }
 
   // Ref for count up animation trigger
   const statsRef = React.useRef(null)
@@ -67,7 +69,11 @@ export default function HomePage() {
             </motion.p>
             
             <motion.div variants={staggerItem} className="mt-4">
-              <SearchBar value="" onChange={() => {}} onSearch={() => {}} placeholder="Search jobs, skills, or companies..." />
+              <SearchBar 
+                value="" 
+                onChange={handleSearch} 
+                placeholder="Search jobs, skills, or companies..." 
+              />
             </motion.div>
 
             <motion.div variants={staggerItem} className="flex flex-wrap items-center gap-3 mt-4">
@@ -163,7 +169,19 @@ export default function HomePage() {
 
           {jobsLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[1,2,3,4,5,6].map(i => <div key={i} className="h-64 rounded-2xl bg-[#0d2e36] animate-pulse" />)}
+              {Array.from({ length: 6 }).map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="h-64 bg-[#0d2e36] rounded-2xl animate-pulse border border-teal-900/50"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: i * 0.1 }}
+                />
+              ))}
+            </div>
+          ) : featuredJobs.length === 0 ? (
+            <div className="text-center py-16 text-gray-400">
+              <p>No featured jobs available yet.</p>
             </div>
           ) : (
             <motion.div 

@@ -1,7 +1,7 @@
 import React from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { MessageSquare, Calendar, ChevronRight, Inbox } from 'lucide-react'
+import { MessageSquare, Calendar, ChevronRight } from 'lucide-react'
 import { useMyInquiries } from '../hooks/useMyInquiries'
 import { format } from 'date-fns'
 import { ROUTES } from '@/shared/constants/routes.constants'
@@ -35,11 +35,22 @@ const EmployerInquiriesPage: React.FC = () => {
           ))
         ) : inquiries.length === 0 ? (
           <div className="bg-[#0D4F4F]/20 border border-white/5 rounded-[40px] p-20 flex flex-col items-center justify-center text-center backdrop-blur-xl">
-             <div className="w-20 h-20 rounded-[30px] bg-white/5 flex items-center justify-center mb-6">
-                <Inbox size={40} className="text-gray-700" />
-             </div>
-             <h3 className="text-xl font-black text-white uppercase italic tracking-tighter">No Inquiries Found</h3>
-             <p className="text-gray-500 text-sm mt-2 max-w-xs">Contact our sales team from the pricing page to start a conversation about our enterprise features.</p>
+            <div className="w-20 h-20 rounded-[30px] bg-white/5 flex items-center justify-center mb-6">
+              <MessageSquare size={40} className="text-gray-600" />
+            </div>
+            <h3 className="text-xl font-black text-white uppercase italic tracking-tighter mb-2">No Inquiries Found</h3>
+            <p className="text-gray-500 text-sm mt-2 max-w-xs mb-8 uppercase font-bold tracking-widest leading-relaxed">
+              Interested in upgrading your plan? Contact our sales team.
+            </p>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Link
+                to={ROUTES.PUBLIC.EMPLOYERS}
+                className="bg-teal-500 hover:bg-teal-400 text-slate-900 font-black px-8 py-4 rounded-3xl inline-flex items-center gap-3 shadow-2xl shadow-teal-500/20 uppercase italic tracking-tighter"
+              >
+                View Pricing & Contact Sales
+                <ChevronRight size={18} />
+              </Link>
+            </motion.div>
           </div>
         ) : (
           inquiries.map((inq, idx) => (

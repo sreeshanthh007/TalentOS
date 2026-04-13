@@ -133,4 +133,30 @@ export class AdminController {
     const message = await this.adminUsecase.sendMessage(user.id, validatedData, user.role as 'admin' | 'employer')
     res.status(HTTP_STATUS.CREATED).json({ success: true, message: MESSAGES.ADMIN.MESSAGE_SENT, data: message })
   })
+
+  // Testimonials
+  getTestimonials = asyncHandler(async (req: Request, res: Response) => {
+    const data = await this.adminUsecase.getTestimonials()
+    res.status(HTTP_STATUS.OK).json({ success: true, message: MESSAGES.SUCCESS, data })
+  })
+
+  createTestimonial = asyncHandler(async (req: Request, res: Response) => {
+    const data = await this.adminUsecase.createTestimonial(req.body)
+    res.status(HTTP_STATUS.CREATED).json({ success: true, message: MESSAGES.ADMIN.TESTIMONIAL_CREATED, data })
+  })
+
+  updateTestimonial = asyncHandler(async (req: Request, res: Response) => {
+    const data = await this.adminUsecase.updateTestimonial(req.params.id as string, req.body)
+    res.status(HTTP_STATUS.OK).json({ success: true, message: MESSAGES.ADMIN.TESTIMONIAL_UPDATED, data })
+  })
+
+  deleteTestimonial = asyncHandler(async (req: Request, res: Response) => {
+    await this.adminUsecase.deleteTestimonial(req.params.id as string)
+    res.status(HTTP_STATUS.OK).json({ success: true, message: MESSAGES.ADMIN.TESTIMONIAL_DELETED })
+  })
+
+  toggleTestimonialStatus = asyncHandler(async (req: Request, res: Response) => {
+    await this.adminUsecase.toggleTestimonialStatus(req.params.id as string, req.body.is_active)
+    res.status(HTTP_STATUS.OK).json({ success: true, message: MESSAGES.SUCCESS })
+  })
 }

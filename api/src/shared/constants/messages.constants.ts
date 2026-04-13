@@ -59,8 +59,15 @@ export const MESSAGES = {
     CANDIDATES_FETCH_SUCCESS: "Candidates fetched successfully",
     PLANS_FETCH_SUCCESS: "Subscription plans fetched successfully",
     INQUIRIES_FETCH_SUCCESS: "Inquiries fetched successfully",
-    MESSAGES_FETCH_SUCCESS: "Messages fetched successfully"
-  }
+    MESSAGES_FETCH_SUCCESS: "Messages fetched successfully",
+    TESTIMONIAL_CREATED: 'Testimonial added successfully',
+    TESTIMONIAL_UPDATED: 'Testimonial updated successfully',
+    TESTIMONIAL_DELETED: 'Testimonial deleted successfully',
+  },
+  INQUIRY: {
+    CREATE_SUCCESS: "Inquiry created successfully",
+  },
+  SUCCESS: "Operation successful"
 };
 
 export const ERROR_MESSAGES = {

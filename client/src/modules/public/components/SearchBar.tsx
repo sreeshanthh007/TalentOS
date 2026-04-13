@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import { Search } from 'lucide-react'
+import React, { useState, useEffect, useRef } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Search, X } from 'lucide-react'
 import { useDebounce } from '@/shared/hooks/useDebounce'
 
 type SearchBarProps = {
   value: string
   onChange: (value: string) => void
-  onSearch: () => void
+  onSearch?: () => void
   placeholder?: string
 }
 
@@ -17,56 +17,83 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   placeholder = "Search by job title, company, or keywords..."
 }) => {
   const [localValue, setLocalValue] = useState(value)
-  const debouncedValue = useDebounce(localValue, 500)
+  const debouncedValue = useDebounce(localValue, 400)
+  const isFirstRender = useRef(true)
 
-  // Update parent when debounced value changes
+  // Sync from parent ONLY if the change is external (e.g. "Clear All" button)
   useEffect(() => {
-    if (debouncedValue !== value) {
-      onChange(debouncedValue);
-    }
-  }, [debouncedValue, value, onChange]);
-
-  // Sync from parent if changed externally
-  useEffect(() => {
-    if (value !== debouncedValue) {
+    if (value !== localValue) {
       setLocalValue(value)
     }
-  }, [value, debouncedValue])
+  }, [value])
+
+  // Call onChange ONLY when debouncedValue changes, and NOT on first mount if it matches value
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      return
+    }
+    onChange(debouncedValue)
+  }, [debouncedValue, onChange])
+
+  const handleClear = () => {
+    setLocalValue('')
+    onChange('')
+  }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       onChange(localValue)
-      onSearch()
+      onSearch?.()
     }
   }
 
   return (
     <motion.div 
-      whileFocus={{ scale: 1.02 }}
-      className="relative flex items-center w-full max-w-3xl mx-auto"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="relative flex items-center w-full max-w-4xl mx-auto group"
     >
-      <div className="absolute left-4 text-gray-400 pointer-events-none">
-        <Search size={24} />
+      <div className="absolute left-5 text-teal-500/50 group-focus-within:text-teal-400 transition-colors pointer-events-none">
+        <Search size={22} />
       </div>
+      
       <input
         type="text"
         value={localValue}
         onChange={(e) => setLocalValue(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
-        className="w-full bg-[#0d2e36] text-white rounded-2xl py-4 pl-12 pr-32 border border-teal-900/50 focus:border-teal-500 focus:outline-none shadow-xl placeholder:text-gray-500 transition-colors text-lg"
+        className="w-full bg-[#0d2e36]/80 backdrop-blur-xl text-white rounded-2xl py-5 pl-14 pr-36 border border-teal-800/30 focus:border-teal-500/50 focus:outline-none focus:ring-4 focus:ring-teal-500/10 shadow-2xl placeholder:text-gray-500 transition-all text-lg"
       />
-      <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={() => {
-          onChange(localValue)
-          onSearch()
-        }}
-        className="absolute right-2 top-2 bottom-2 bg-teal-500 hover:bg-teal-400 text-slate-900 font-bold px-6 rounded-xl transition-colors"
-      >
-        Search
-      </motion.button>
+
+      <div className="absolute right-3 flex items-center gap-2">
+        <AnimatePresence>
+          {localValue && (
+            <motion.button
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              onClick={handleClear}
+              className="p-2 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+            >
+              <X size={20} />
+            </motion.button>
+          )}
+        </AnimatePresence>
+        
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={() => {
+            onChange(localValue)
+            onSearch?.()
+          }}
+          className="bg-teal-500 hover:bg-teal-400 text-slate-900 font-bold px-7 py-2.5 rounded-xl transition-all shadow-lg shadow-teal-500/20"
+        >
+          Search
+        </motion.button>
+      </div>
     </motion.div>
   )
 }
