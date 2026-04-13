@@ -2,8 +2,12 @@ import { IPublicRepository } from "../interfaces/IPublicRepository";
 import { CategoryModel } from "../models/category.model";
 import { IPublicUseCase } from "../interfaces/IPublicUseCase";
 import { SubscriptionPlanModel, JobModel, EmployerProfileModel } from "@modules/employers/models/employer.model";
+import { TestimonialModel } from "@modules/admin/models/admin.model";
 import { JobFiltersModel } from "../models/job.model";
 import { ContactInquiryPayload } from "../dtos/public.dto";
+import { CustomError } from "@shared/utils/CustomError";
+import { ERROR_MESSAGES } from "@shared/constants/messages.constants";
+import { HTTP_STATUS } from "@shared/constants/statusCodes.constants";
 
 
 export class PublicUseCase implements IPublicUseCase {
@@ -29,7 +33,13 @@ export class PublicUseCase implements IPublicUseCase {
     }
 
     async getJobById(id: string): Promise<JobModel> {
-        return this.publicRepository.getJobById(id);
+        const job = await this.publicRepository.getJobById(id)
+        if (!job) {
+          throw new CustomError(ERROR_MESSAGES.NOT_FOUND, HTTP_STATUS.NOT_FOUND)
+        }
+        // Increment views_count
+        await this.publicRepository.incrementJobViews(id)
+        return job
     }
 
     async createInquiry(data: ContactInquiryPayload, userId?: string): Promise<void> {
@@ -59,7 +69,7 @@ export class PublicUseCase implements IPublicUseCase {
         return this.publicRepository.getEmployerProfileByUserId(userId);
     }
 
-    async getTestimonials(): Promise<any[]> {
+    async getTestimonials(): Promise<TestimonialModel[]> {
         return this.publicRepository.getTestimonials();
     }
 }

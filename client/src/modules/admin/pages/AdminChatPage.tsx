@@ -3,18 +3,22 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { ChatWindow } from '../components/ChatWindow'
 import { useInquiries } from '../hooks/useInquiries'
+import { useMessages } from '../hooks/useMessages'
+import { useSendMessage } from '../hooks/useSendMessage'
 import { ArrowLeft } from 'lucide-react'
 import { ROUTES } from '@/shared/constants/routes.constants'
-
-import type { RootState } from '@/shared/store'
+import type { RootState } from '@/store'
 
 const AdminChatPage: React.FC = () => {
   const { id: inquiryId } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { data: res } = useInquiries()
-  const user = useSelector((state: RootState) => state.auth.user)
+  const { data: inquiriesRes } = useInquiries()
+  const { data: messagesRes, isLoading } = useMessages(inquiryId || '')
+  const { mutate: sendMessage, isPending } = useSendMessage()
+  const admin = useSelector((state: RootState) => state.admin.admin)
 
-  const currentInquiry = res?.data.find(q => q.id === inquiryId)
+  const currentInquiry = inquiriesRes?.data.find(q => q.id === inquiryId)
+  const messages = messagesRes?.data || []
 
   if (!inquiryId) return null
 
@@ -42,8 +46,12 @@ const AdminChatPage: React.FC = () => {
       <ChatWindow 
         inquiryId={inquiryId}
         currentRole="admin"
-        currentUserId={user?.id || ''}
+        currentUserId={admin?.id || ''}
         title={currentInquiry?.subject}
+        messages={messages}
+        isLoading={isLoading}
+        onSendMessage={(content) => sendMessage({ inquiry_id: inquiryId, content })}
+        isSending={isPending}
       />
     </div>
   )

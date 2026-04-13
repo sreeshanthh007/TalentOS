@@ -141,7 +141,7 @@ export async function updatePlanApi(
   planId: string,
   data: UpdatePlanPayload
 ): Promise<ApiResponse<SubscriptionPlan>> {
-  const response = await axiosInstance.patch<ApiResponse<SubscriptionPlan>>(`${BASE}/plans/${planId}`, data)
+  const response = await axiosInstance.put<ApiResponse<SubscriptionPlan>>(`${BASE}/plans/${planId}`, data)
   return response.data
 }
 

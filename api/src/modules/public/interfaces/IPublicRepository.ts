@@ -10,7 +10,8 @@ export interface IPublicRepository {
     getPlans(): Promise<SubscriptionPlanModel[]>
     getJobs(filters: JobFiltersModel): Promise<{ data: JobModel[]; total: number }>
     getFeaturedJobs(): Promise<JobModel[]>
-    getJobById(id: string): Promise<JobModel>
+    getJobById(id: string): Promise<JobModel | null>
+    incrementJobViews(id: string): Promise<void>
     createInquiry(data: CreateInquiryDTO): Promise<InquiryModel>
     findPlanByName(name: string): Promise<SubscriptionPlanModel | null>
     getEmployerProfileByUserId(userId: string): Promise<EmployerProfileModel | null>

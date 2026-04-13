@@ -20,7 +20,7 @@ export default function EmployersLandingPage() {
 
   const plans = plansRes?.data || []
 
-  const scrollToContact = (planId: string) => {
+  const scrollToContact = () => {
     contactFormRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 

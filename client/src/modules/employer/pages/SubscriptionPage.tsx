@@ -10,11 +10,10 @@ import { usePlans } from '@/modules/auth/hooks/usePlans'
 
 const SubscriptionPage: React.FC = () => {
   const { data: subRes, isLoading: isSubLoading } = useMySubscription()
-  const { data: plansRes, isLoading: isPlansLoading } = usePlans()
+  const { data: plansRes } = usePlans()
   
   const subscription = subRes?.data
   const plans = plansRes?.data || []
-  const isLoading = isSubLoading || isPlansLoading
 
   return (
     <div className="max-w-6xl mx-auto">

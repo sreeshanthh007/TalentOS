@@ -7,7 +7,7 @@ import { CustomError } from "@shared/utils/CustomError";
 import { ERROR_MESSAGES, MESSAGES } from "@shared/constants/messages.constants";
 import { HTTP_STATUS } from "@shared/constants/statusCodes.constants";
 import { CreateInquiryDTO } from "../dtos/public.dto";
-import { InquiryModel } from "@modules/admin/models/admin.model";
+import { InquiryModel, TestimonialModel } from "@modules/admin/models/admin.model";
 
 
 export class PublicRepository implements IPublicRepository {
@@ -67,26 +67,41 @@ export class PublicRepository implements IPublicRepository {
         return data as any[]
     }
 
-    async getJobById(id: string): Promise<JobModel> {
-        const { data, error } = await supabaseClient
-            .from('jobs')
-            .select(`
-                *,
-                employer:employer_profiles ( company_name, company_logo_url, industry, company_description, website, address ),
-                category:job_categories ( name, icon )
-            `)
-            .eq('id', id)
-            .eq('status', 'active')
-            .single()
+    async getJobById(id: string): Promise<JobModel | null> {
+      const { data, error } = await supabaseClient
+        .from('jobs')
+        .select(`
+          *,
+          employer_profiles (
+            company_name,
+            company_logo_url,
+            industry
+          ),
+          job_categories (
+            name,
+            icon
+          )
+        `)
+        .eq('id', id)
+        .eq('status', 'active')
+        .maybeSingle()
+    
+      if (error) {
+        throw new CustomError(
+          ERROR_MESSAGES.SERVER_ERROR,
+          HTTP_STATUS.INTERNAL_SERVER_ERROR
+        )
+      }
+    
+      return data as JobModel | null
+    }
 
-        if (error) {
-            if (error.code === 'PGRST116') {
-                throw new CustomError(MESSAGES.JOB.NOT_FOUND, HTTP_STATUS.NOT_FOUND)
-            }
-            throw new CustomError(ERROR_MESSAGES.SERVER_ERROR, HTTP_STATUS.INTERNAL_SERVER_ERROR)
-        }
-
-        return data as any
+    async incrementJobViews(id: string): Promise<void> {
+      await supabaseClient.rpc('increment_job_views', { job_id: id })
+      // If RPC not available, use:
+      // await supabaseClient.from('jobs')
+      //   .update({ views_count: supabaseClient.raw('views_count + 1') })
+      //   .eq('id', id)
     }
       
     async getJobs(filters: JobFiltersModel): Promise<{ data: JobModel[]; total: number }> {
@@ -190,17 +205,20 @@ export class PublicRepository implements IPublicRepository {
         return data as EmployerProfileModel | null
     }
 
-    async getTestimonials(): Promise<any[]> {
-        const { data, error } = await supabaseClient
-            .from('testimonials')
-            .select('*')
-            .eq('is_active', true)
-            .order('created_at', { ascending: false })
-
-        if (error) {
-            throw new CustomError(ERROR_MESSAGES.SERVER_ERROR, HTTP_STATUS.INTERNAL_SERVER_ERROR)
-        }
-
-        return data
+    async getTestimonials(): Promise<TestimonialModel[]> {
+      const { data, error } = await supabaseClient
+        .from('testimonials')
+        .select('*')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+    
+      if (error) {
+        throw new CustomError(
+          ERROR_MESSAGES.SERVER_ERROR,
+          HTTP_STATUS.INTERNAL_SERVER_ERROR
+        )
+      }
+    
+      return data as TestimonialModel[]
     }
 }

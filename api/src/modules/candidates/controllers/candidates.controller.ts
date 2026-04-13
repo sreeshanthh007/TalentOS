@@ -75,5 +75,16 @@ export class CandidatesController {
       data: result
     })
   })
+
+  updateAvatar = asyncHandler(async (req: Request, res: Response) => {
+    const userId = (req as CustomRequest).user.id
+    const { avatar_url } = req.body
+    const updated = await this.candidateUsecase.updateAvatar(userId, avatar_url)
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      message: MESSAGES.CANDIDATE.PROFILE_UPDATE_SUCCESS,
+      data: updated
+    })
+  })
 }
 
