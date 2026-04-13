@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
-import { IAdminUsecase } from '../interfaces/IAdminUsecase'
+import { IAdminUsecase } from '@modules/admin/interfaces/IAdminUsecase'
 import { HTTP_STATUS } from '@shared/constants/statusCodes.constants'
 import { asyncHandler } from '@shared/utils/asyncHandler'
 import { CustomRequest } from '@shared/middlewares/auth.middleware'
@@ -10,7 +10,7 @@ import {
   updateInquiryStatusSchema, 
   blockUserSchema, 
   sendMessageSchema 
-} from '../validators/admin.validator'
+} from '@modules/admin/validators/admin.validator'
 
 export class AdminController {
   constructor(private readonly adminUsecase: IAdminUsecase) {}

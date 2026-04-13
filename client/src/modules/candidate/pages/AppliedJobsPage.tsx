@@ -5,13 +5,13 @@ import {
   Search,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { useMyApplications } from '../hooks/useMyApplications'
+import { useMyApplications } from '@/modules/candidate/hooks/useMyApplications'
 import { ROUTES } from '@/shared/constants/routes.constants'
 import { useDebounce } from '@/shared/hooks/useDebounce'
 
 // Components
-import { ApplicationCard } from '../components/applications/ApplicationCard'
-import { StatusTabs } from '../components/applications/StatusTabs'
+import { ApplicationCard } from '@/modules/candidate/components/applications/ApplicationCard'
+import { StatusTabs } from '@/modules/candidate/components/applications/StatusTabs'
 
 const tabs = ['All', 'Applied', 'Shortlisted', 'Interviewing', 'Offered', 'Hired', 'Rejected'] as const
 type TabType = typeof tabs[number]

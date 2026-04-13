@@ -7,9 +7,9 @@ import {
   Loader2
 } from 'lucide-react'
 import { nanoid } from 'nanoid'
-import { useCandidateProfile } from '../hooks/useCandidateProfile'
-import { useUpdateCandidateProfile } from '../hooks/useUpdateCandidateProfile'
-import { uploadAvatarApi } from '../services/candidate.service'
+import { useCandidateProfile } from '@/modules/candidate/hooks/useCandidateProfile'
+import { useUpdateCandidateProfile } from '@/modules/candidate/hooks/useUpdateCandidateProfile'
+import { uploadAvatarApi } from '@/modules/candidate/services/candidate.service'
 import { type Education, type Experience, type UpdateCandidateProfilePayload, type CandidateUser } from '@/shared/types'
 import { toast } from 'sonner'
 import { cn } from '@/shared/utils/cn'
@@ -17,10 +17,10 @@ import { useAppDispatch } from '@/store/hooks'
 import { candidateLogin } from '@/store/slices/candidateSlice'
 
 // Components
-import { ProfileHeader } from '../components/profile/ProfileHeader'
-import { BasicInfoForm } from '../components/profile/BasicInfoForm'
-import { EducationSection } from '../components/profile/EducationSection'
-import { ExperienceSection } from '../components/profile/ExperienceSection'
+import { ProfileHeader } from '@/modules/candidate/components/profile/ProfileHeader'
+import { BasicInfoForm } from '@/modules/candidate/components/profile/BasicInfoForm'
+import { EducationSection } from '@/modules/candidate/components/profile/EducationSection'
+import { ExperienceSection } from '@/modules/candidate/components/profile/ExperienceSection'
 
 const tabs = [
   { id: 'basic', label: 'Basic Info', icon: User },
@@ -63,9 +63,9 @@ const CandidateProfilePage: React.FC = () => {
       const res = await uploadAvatarApi(file)
       console.log("res",res)
       updateProfile({ avatar_url: res.data.avatar_url })
-      toast.success('Avatar updated successfully')
-    } catch (error) {
-      toast.error('Failed to upload avatar')
+      toast.success(res.message || 'Avatar updated successfully')
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || 'Failed to upload avatar')
     } finally {
       setIsUploadingAvatar(false)
     }

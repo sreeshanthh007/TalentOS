@@ -1,5 +1,5 @@
-import { UserModel } from '../models/user.model';
-import { LoginOutputDTO, TokenResponseDTO } from '../dtos/auth.dto';
+import { UserModel } from '@modules/auth/models/user.model';
+import { LoginOutputDTO, TokenResponseDTO } from '@modules/auth/dtos/auth.dto';
 
 export class AuthMapper {
   static toAuthResponse(user: UserModel, accessToken: string, refreshToken: string): LoginOutputDTO {
