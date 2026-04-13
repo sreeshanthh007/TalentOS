@@ -4,11 +4,13 @@ import {
   AdminEmployerModel, 
   AdminStatsModel, 
   InquiryModel, 
-  MessageModel 
+  MessageModel,
+  TestimonialModel
 } from '../models/admin.model'
 import { 
   UpdatePlanDTO, 
-  SendMessageDTO 
+  SendMessageDTO,
+  CreateTestimonialDTO
 } from '../dtos/admin.dto'
 import { SubscriptionPlanModel } from '@modules/employers/models/employer.model'
 import { supabaseClient as supabase } from '@shared/config/db.config'
@@ -329,5 +331,80 @@ async updatePlan(planId: string, data: UpdatePlanDTO): Promise<SubscriptionPlanM
       .eq('status', 'open')
 
     return inserted
+  }
+
+  // Testimonials
+  async getTestimonials(): Promise<TestimonialModel[]> {
+    const { data, error } = await this.supabase
+      .from('testimonials')
+      .select('*')
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      throw new CustomError(ERROR_MESSAGES.SERVER_ERROR, HTTP_STATUS.INTERNAL_SERVER_ERROR)
+    }
+
+    return data as TestimonialModel[]
+  }
+
+  async createTestimonial(data: CreateTestimonialDTO): Promise<TestimonialModel> {
+    const { data: testimonial, error } = await this.supabase
+      .from('testimonials')
+      .insert({
+        author_name: data.author_name,
+        author_role: data.author_role || null,
+        content: data.content,
+        rating: data.rating,
+        is_active: data.is_active ?? true,
+        avatar_url: data.avatar_url || null
+      })
+      .select()
+      .single()
+
+    if (error) {
+      throw new CustomError(ERROR_MESSAGES.SERVER_ERROR, HTTP_STATUS.INTERNAL_SERVER_ERROR)
+    }
+
+    return testimonial as TestimonialModel
+  }
+
+  async updateTestimonial(
+    id: string, 
+    data: Partial<CreateTestimonialDTO>
+  ): Promise<TestimonialModel> {
+    const { data: testimonial, error } = await this.supabase
+      .from('testimonials')
+      .update(data)
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) {
+      throw new CustomError(ERROR_MESSAGES.SERVER_ERROR, HTTP_STATUS.INTERNAL_SERVER_ERROR)
+    }
+
+    return testimonial as TestimonialModel
+  }
+
+  async deleteTestimonial(id: string): Promise<void> {
+    const { error } = await this.supabase
+      .from('testimonials')
+      .delete()
+      .eq('id', id)
+
+    if (error) {
+      throw new CustomError(ERROR_MESSAGES.SERVER_ERROR, HTTP_STATUS.INTERNAL_SERVER_ERROR)
+    }
+  }
+
+  async toggleTestimonialStatus(id: string, isActive: boolean): Promise<void> {
+    const { error } = await this.supabase
+      .from('testimonials')
+      .update({ is_active: isActive })
+      .eq('id', id)
+
+    if (error) {
+      throw new CustomError(ERROR_MESSAGES.SERVER_ERROR, HTTP_STATUS.INTERNAL_SERVER_ERROR)
+    }
   }
 }

@@ -33,6 +33,7 @@ export const ROUTES = {
     PLANS: '/admin/plans',
     INQUIRIES: '/admin/inquiries',
     CHAT: '/admin/inquiries/:id/chat',
+    TESTIMONIALS: '/admin/testimonials',
   },
 
   PUBLIC: {

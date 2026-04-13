@@ -29,5 +29,12 @@ router.patch('/inquiries/:id/status', roleMiddleware('admin'), (req, res, next) 
 router.get('/inquiries/:id/messages', roleMiddleware('admin', 'employer'), (req, res, next) => Resolver.adminController.getMessages(req, res, next))
 router.post('/messages', roleMiddleware('admin', 'employer'), (req, res, next) => Resolver.adminController.sendMessage(req, res, next))
 
+// Testimonials
+router.get('/testimonials', roleMiddleware('admin'), (req, res, next) => Resolver.adminController.getTestimonials(req, res, next))
+router.post('/testimonials', roleMiddleware('admin'), (req, res, next) => Resolver.adminController.createTestimonial(req, res, next))
+router.put('/testimonials/:id', roleMiddleware('admin'), (req, res, next) => Resolver.adminController.updateTestimonial(req, res, next))
+router.delete('/testimonials/:id', roleMiddleware('admin'), (req, res, next) => Resolver.adminController.deleteTestimonial(req, res, next))
+router.patch('/testimonials/:id/toggle', roleMiddleware('admin'), (req, res, next) => Resolver.adminController.toggleTestimonialStatus(req, res, next))
+
 export { router as adminRouter }
 

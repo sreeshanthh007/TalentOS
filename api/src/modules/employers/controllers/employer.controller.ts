@@ -114,9 +114,9 @@ export class EmployerController {
     })
   })
   
-  getInquiries = asyncHandler(async (req: Request, res: Response) => {
+  getMyInquiries = asyncHandler(async (req: Request, res: Response) => {
     const userId = (req as CustomRequest).user.id
-    const inquiries = await this.employerUsecase.getInquiries(userId)
+    const inquiries = await this.employerUsecase.getMyInquiries(userId)
     res.status(HTTP_STATUS.OK).json({ success: true, data: inquiries })
   })
 
@@ -127,9 +127,9 @@ export class EmployerController {
     res.status(HTTP_STATUS.OK).json({ success: true, data: messages })
   })
 
-  sendMessage = asyncHandler(async (req: Request, res: Response) => {
+  sendEmployerMessage = asyncHandler(async (req: Request, res: Response) => {
     const userId = (req as CustomRequest).user.id
-    const message = await this.employerUsecase.sendMessage(userId, req.body)
+    const message = await this.employerUsecase.sendEmployerMessage(userId, req.body)
     res.status(HTTP_STATUS.CREATED).json({ success: true, data: message })
   })
 }

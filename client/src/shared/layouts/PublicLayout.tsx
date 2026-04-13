@@ -3,6 +3,7 @@ import { Outlet, Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 import { ROUTES } from '@/shared/constants/routes.constants';
+import { useAppSelector } from '@/store/hooks';
 
 const navLinks = [
   { name: 'Home', path: ROUTES.HOME },
@@ -14,6 +15,8 @@ const navLinks = [
 export const PublicLayout = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const { isAuthenticated: isCandidateAuthenticated } = useAppSelector(state => state.candidate);
+  const { isAuthenticated: isEmployerAuthenticated } = useAppSelector(state => state.employer);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#0a2329] font-sans text-white">
@@ -62,21 +65,36 @@ export const PublicLayout = () => {
             })}
           </nav>
 
-          {/* Desktop Right */}
           <div className="hidden md:flex items-center gap-6">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
-              <Link to={ROUTES.AUTH.LOGIN} className="text-white hover:text-teal-400 font-medium transition-colors">
-                Login
-              </Link>
-            </motion.div>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}>
-              <Link 
-                to={ROUTES.AUTH.REGISTER_EMPLOYER} 
-                className="bg-teal-500 hover:bg-teal-400 text-[#0a2329] font-bold px-6 py-2.5 rounded-lg shadow-lg shadow-teal-500/20 transition-all active:scale-95"
-              >
-                Post a Job
-              </Link>
-            </motion.div>
+            {!isCandidateAuthenticated && !isEmployerAuthenticated && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
+                <Link to={ROUTES.AUTH.LOGIN} className="text-white hover:text-teal-400 font-medium transition-colors">
+                  Login
+                </Link>
+              </motion.div>
+            )}
+            
+            {!isCandidateAuthenticated && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}>
+                <Link 
+                  to={isEmployerAuthenticated ? ROUTES.EMPLOYER.DASHBOARD : ROUTES.AUTH.REGISTER_EMPLOYER} 
+                  className="bg-teal-500 hover:bg-teal-400 text-[#0a2329] font-bold px-6 py-2.5 rounded-lg shadow-lg shadow-teal-500/20 transition-all active:scale-95"
+                >
+                  {isEmployerAuthenticated ? 'Employer Dashboard' : 'Post a Job'}
+                </Link>
+              </motion.div>
+            )}
+
+            {isCandidateAuthenticated && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}>
+                <Link 
+                  to={ROUTES.CANDIDATE.DASHBOARD}
+                  className="bg-teal-500 hover:bg-teal-400 text-[#0a2329] font-bold px-6 py-2.5 rounded-lg shadow-lg shadow-teal-500/20 transition-all active:scale-95"
+                >
+                  Candidate Dashboard
+                </Link>
+              </motion.div>
+            )}
           </div>
 
           {/* Mobile Toggle */}
@@ -110,20 +128,35 @@ export const PublicLayout = () => {
                 </Link>
               ))}
               <hr className="border-teal-900/50 my-2" />
-              <Link 
-                to={ROUTES.AUTH.LOGIN}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="text-white text-lg font-medium p-2 rounded-lg"
-              >
-                Login
-              </Link>
-              <Link 
-                to={ROUTES.AUTH.REGISTER_EMPLOYER}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="bg-teal-500 text-center text-[#0a2329] font-bold p-3 rounded-lg mt-2"
-              >
-                Post a Job
-              </Link>
+              {!isCandidateAuthenticated && !isEmployerAuthenticated && (
+                <Link 
+                  to={ROUTES.AUTH.LOGIN}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="text-white text-lg font-medium p-2 rounded-lg"
+                >
+                  Login
+                </Link>
+              )}
+              
+              {!isCandidateAuthenticated && (
+                <Link 
+                  to={isEmployerAuthenticated ? ROUTES.EMPLOYER.DASHBOARD : ROUTES.AUTH.REGISTER_EMPLOYER}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="bg-teal-500 text-center text-[#0a2329] font-bold p-3 rounded-lg mt-2"
+                >
+                  {isEmployerAuthenticated ? 'Employer Dashboard' : 'Post a Job'}
+                </Link>
+              )}
+
+              {isCandidateAuthenticated && (
+                <Link 
+                  to={ROUTES.CANDIDATE.DASHBOARD}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="bg-teal-500 text-center text-[#0a2329] font-bold p-3 rounded-lg mt-2"
+                >
+                  Candidate Dashboard
+                </Link>
+              )}
             </div>
           </motion.div>
         )}

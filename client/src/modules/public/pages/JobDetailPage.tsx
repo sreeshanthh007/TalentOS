@@ -7,13 +7,21 @@ import { useJobDetail, useJobs } from '../hooks/useJobs'
 import { JobCard } from '../components/JobCard'
 import { useToast } from '@/shared/hooks/useToast'
 import { ROUTES } from '@/shared/constants/routes.constants'
-import { getSession } from '@/shared/utils/session'
 import { pageVariants } from '@/shared/animations/auth.animations'
+import { useAppSelector } from '@/store/hooks'
+import { ApplyModal } from '@/modules/candidate/components/ApplyModal'
+import { useCandidateProfile } from '@/modules/candidate/hooks/useCandidateProfile'
 
 export default function JobDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const toast = useToast()
+
+  const candidate = useAppSelector(state => state.candidate.candidate)
+  const isCandidate = useAppSelector(state => state.candidate.isAuthenticated)
+  const { data: profileRes } = useCandidateProfile(isCandidate);
+  const profile = profileRes?.data;
+  const [isApplyModalOpen, setIsApplyModalOpen] = useState(false)
   
   const [activeTab, setActiveTab] = useState<'description' | 'requirements'>('description')
   
@@ -50,14 +58,12 @@ export default function JobDetailPage() {
   }
 
   const handleApply = () => {
-    const session = getSession()
-    if (!session || session.role !== 'candidate') {
+    if (!isCandidate) {
       toast.info("Please login as a candidate to apply")
       navigate(ROUTES.AUTH.LOGIN)
       return
     }
-    // In a real app we would navigate to an application flow or direct apply hook
-    navigate(`${ROUTES.CANDIDATE.DASHBOARD}/apply/${job.id}`) // Placeholder route
+    setIsApplyModalOpen(true)
   }
 
   const handleShare = () => {
@@ -220,6 +226,15 @@ export default function JobDetailPage() {
         </motion.div>
 
       </div>
+
+      {job && (
+        <ApplyModal
+          isOpen={isApplyModalOpen}
+          onClose={() => setIsApplyModalOpen(false)}
+          job={job}
+          savedResumeUrl={profile?.resume_url || candidate?.resume_url || null}
+        />
+      )}
     </motion.div>
   )
 }

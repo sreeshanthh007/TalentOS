@@ -265,18 +265,41 @@ export class EmployerRepository implements IEmployerRepository {
   }
 
   // Inquiries & Messages
-  async getInquiries(employerId: string): Promise<InquiryModel[]> {
+  async getMyInquiries(employerId: string): Promise<InquiryModel[]> {
     const { data, error } = await this.supabase
       .from('inquiries')
       .select(`
         *,
-        plan:subscription_plans(display_name)
+        plan:subscription_plans ( display_name )
       `)
       .eq('employer_id', employerId)
       .order('created_at', { ascending: false })
 
-    if (error) throw new CustomError(error.message, HTTP_STATUS.INTERNAL_SERVER_ERROR)
-    return data
+    if (error) {
+      throw new CustomError(
+        error.message,
+        HTTP_STATUS.INTERNAL_SERVER_ERROR
+      )
+    }
+
+    return data as InquiryModel[]
+  }
+
+  async getInquiryById(inquiryId: string): Promise<InquiryModel | null> {
+    const { data, error } = await this.supabase
+      .from('inquiries')
+      .select('*')
+      .eq('id', inquiryId)
+      .maybeSingle()
+
+    if (error) {
+      throw new CustomError(
+        error.message,
+        HTTP_STATUS.INTERNAL_SERVER_ERROR
+      )
+    }
+
+    return data as InquiryModel | null
   }
 
   async getInquiryMessages(employerId: string, inquiryId: string): Promise<MessageModel[]> {
@@ -297,30 +320,40 @@ export class EmployerRepository implements IEmployerRepository {
       .order('sent_at', { ascending: true })
 
     if (error) throw new CustomError(error.message, HTTP_STATUS.INTERNAL_SERVER_ERROR)
-    return data
+    return data as MessageModel[]
   }
 
-  async sendMessage(senderId: string, data: SendMessageDTO): Promise<MessageModel> {
-    const { data: inserted, error } = await this.supabase
+  async sendMessage(
+    senderId: string,
+    data: SendMessageDTO,
+    senderRole: 'admin' | 'employer'
+  ): Promise<MessageModel> {
+    const { data: message, error } = await this.supabase
       .from('messages')
       .insert({
         inquiry_id: data.inquiry_id,
+        sender_role: senderRole,
         sender_id: senderId,
-        sender_role: 'employer',
-        content: data.content
+        content: data.content,
+        is_read: false
       })
       .select()
       .single()
 
-    if (error) throw new CustomError(error.message, HTTP_STATUS.INTERNAL_SERVER_ERROR)
+    if (error) {
+      throw new CustomError(
+        error.message,
+        HTTP_STATUS.INTERNAL_SERVER_ERROR
+      )
+    }
 
-    // Mark inquiry as in_progress if currently open
+    // Update inquiry to in_progress if currently open
     await this.supabase
       .from('inquiries')
       .update({ status: 'in_progress', updated_at: new Date().toISOString() })
       .eq('id', data.inquiry_id)
       .eq('status', 'open')
 
-    return inserted
+    return message as MessageModel
   }
 }

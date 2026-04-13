@@ -98,9 +98,9 @@ export class EmployerUsecase implements IEmployerUsecase {
     await this.employerRepository.updateVerificationStatus(profile.id, 'submitted')
   }
 
-  async getInquiries(userId: string): Promise<InquiryModel[]> {
+  async getMyInquiries(userId: string): Promise<InquiryModel[]> {
     const profile = await this.getProfile(userId)
-    return await this.employerRepository.getInquiries(profile.id)
+    return await this.employerRepository.getMyInquiries(profile.id)
   }
 
   async getInquiryMessages(userId: string, inquiryId: string): Promise<MessageModel[]> {
@@ -108,8 +108,8 @@ export class EmployerUsecase implements IEmployerUsecase {
     return await this.employerRepository.getInquiryMessages(profile.id, inquiryId)
   }
 
-  async sendMessage(userId: string, data: SendMessageDTO): Promise<MessageModel> {
+  async sendEmployerMessage(userId: string, data: SendMessageDTO): Promise<MessageModel> {
     const profile = await this.getProfile(userId)
-    return await this.employerRepository.sendMessage(profile.id, data)
+    return await this.employerRepository.sendMessage(profile.id, data, 'employer')
   }
 }

@@ -5,8 +5,6 @@ export function useFeaturedJobs() {
   return useQuery({
     queryKey: ['jobs', 'featured'],
     queryFn: getFeaturedJobsApi,
-    retry: 1,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    refetchOnWindowFocus: false,
+    staleTime: 1000 * 60 * 5,
   })
 }

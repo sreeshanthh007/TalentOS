@@ -4,7 +4,6 @@ import { EmployerStats, EmployerSubscription } from '@modules/employers/interfac
 import { InquiryModel, MessageModel } from '@modules/admin/models/admin.model'
 import { SendMessageDTO } from '@modules/admin/dtos/admin.dto'
 
-
 export interface IEmployerUsecase {
   getProfile(userId: string): Promise<EmployerProfileModel>
   updateProfile(userId: string, data: UpdateEmployerProfileDTO): Promise<EmployerProfileModel>
@@ -19,7 +18,8 @@ export interface IEmployerUsecase {
   getDocuments(userId: string): Promise<EmployerDocumentModel[]>
   addDocument(userId: string, data: UploadDocumentDTO): Promise<EmployerDocumentModel>
   submitVerification(userId: string): Promise<void>
-  getInquiries(userId: string): Promise<InquiryModel[]>
+  // Inquiries & Messages
+  getMyInquiries(userId: string): Promise<InquiryModel[]>
   getInquiryMessages(userId: string, inquiryId: string): Promise<MessageModel[]>
-  sendMessage(userId: string, data: SendMessageDTO): Promise<MessageModel>
+  sendEmployerMessage(userId: string, data: SendMessageDTO): Promise<MessageModel>
 }

@@ -20,8 +20,8 @@ export interface IEmployerRepository {
   addDocument(employerId: string, data: UploadDocumentDTO): Promise<EmployerDocumentModel>
   updateVerificationStatus(employerId: string, status: string): Promise<void>
   getPlanLimit(employerId: string): Promise<number>
-  // Inquiries & Messages
-  getInquiries(employerId: string): Promise<InquiryModel[]>
+  getMyInquiries(employerId: string): Promise<InquiryModel[]>
+  getInquiryById(inquiryId: string): Promise<InquiryModel | null>
   getInquiryMessages(employerId: string, inquiryId: string): Promise<MessageModel[]>
-  sendMessage(senderId: string, data: SendMessageDTO): Promise<MessageModel>
+  sendMessage(senderId: string, data: SendMessageDTO, senderRole: 'admin' | 'employer'): Promise<MessageModel>
 }

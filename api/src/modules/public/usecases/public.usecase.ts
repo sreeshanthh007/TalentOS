@@ -1,8 +1,12 @@
 import { IPublicRepository } from "../interfaces/IPublicRepository";
 import { CategoryModel } from "../models/category.model";
+import { IPublicUseCase } from "../interfaces/IPublicUseCase";
+import { SubscriptionPlanModel, JobModel, EmployerProfileModel } from "@modules/employers/models/employer.model";
+import { JobFiltersModel } from "../models/job.model";
+import { ContactInquiryPayload } from "../dtos/public.dto";
 
 
-export class PublicUseCase {
+export class PublicUseCase implements IPublicUseCase {
 
     constructor(
         private readonly publicRepository: IPublicRepository
@@ -12,7 +16,50 @@ export class PublicUseCase {
         return this.publicRepository.getAllCategories();
     }
 
-    async getPlans() {
+    async getPlans(): Promise<SubscriptionPlanModel[]> {
         return this.publicRepository.getPlans();
+    }
+
+    async getJobs(filters: JobFiltersModel): Promise<{ data: JobModel[]; total: number }> {
+        return this.publicRepository.getJobs(filters);
+    }
+
+    async getFeaturedJobs(): Promise<JobModel[]> {
+        return this.publicRepository.getFeaturedJobs();
+    }
+
+    async getJobById(id: string): Promise<JobModel> {
+        return this.publicRepository.getJobById(id);
+    }
+
+    async createInquiry(data: ContactInquiryPayload, userId?: string): Promise<void> {
+        // Find plan id by name if plan_interested provided
+        let planId: string | null = null;
+        if (data.plan_interested) {
+          const plan = await this.publicRepository.findPlanByName(data.plan_interested);
+          planId = plan?.id || null;
+        }
+
+        // Link to employer if userId provided
+        let employerId: string | null = null;
+        if (userId) {
+            const profile = await this.publicRepository.getEmployerProfileByUserId(userId);
+            employerId = profile?.id || null;
+        }
+      
+        await this.publicRepository.createInquiry({
+          employer_id: employerId,
+          plan_id: planId,
+          subject: `Plan Inquiry: ${data.plan_interested || 'General'}`,
+          initial_message: `Company: ${data.company_name}\nPhone: ${data.phone}\n\n${data.message}`,
+        });
+    }
+
+    async getEmployerProfile(userId: string): Promise<EmployerProfileModel | null> {
+        return this.publicRepository.getEmployerProfileByUserId(userId);
+    }
+
+    async getTestimonials(): Promise<any[]> {
+        return this.publicRepository.getTestimonials();
     }
 }

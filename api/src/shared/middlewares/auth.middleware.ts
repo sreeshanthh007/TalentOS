@@ -19,7 +19,7 @@ export interface CustomRequest extends Request {
   user: CustomJWTPayload;
 }
 
-const extractToken = (req: Request): { access_token: string; refresh_token: string } | null => {
+export const extractToken = (req: Request): { access_token: string; refresh_token: string } | null => {
   const basePath = req.baseUrl.split("/");
   const userType = ROLE_MAP[basePath[3]];
 
@@ -93,6 +93,31 @@ export const verifyAuth = async (req: Request, res: Response, next: NextFunction
       error: error.message
     });
   }
+};
+
+/**
+ * Optional authentication middleware that identifies the user but does not block the request
+ */
+export const optionalAuth = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const token = extractToken(req);
+      if (token?.access_token) {
+        if (!(await isBlacklisted(token.access_token))) {
+          const tokenService = Resolver.tokenService;
+          const user = tokenService.verifyAccessToken(token.access_token) as CustomJWTPayload;
+          if (user && user.id) {
+            (req as CustomRequest).user = {
+              ...user,
+              access_token: token.access_token,
+              refresh_token: token.refresh_token
+            };
+          }
+        }
+      }
+    } catch {
+      // Ignore errors — we just want to know if they ARE logged in
+    }
+    next();
 };
 
 export const decodeToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {

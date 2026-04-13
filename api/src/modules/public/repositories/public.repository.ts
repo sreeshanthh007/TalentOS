@@ -1,7 +1,13 @@
 import { IPublicRepository } from "../interfaces/IPublicRepository";
-import { CategoryModel, CreateCategoryData, UpdateCategoryData } from "../models/category.model";
-import { SubscriptionPlanModel } from "@modules/employers/models/employer.model";
+import { CategoryModel } from "../models/category.model";
+import { SubscriptionPlanModel, JobModel, EmployerProfileModel } from "@modules/employers/models/employer.model";
 import { supabaseClient } from "@shared/config/db.config";
+import { JobFiltersModel } from "../models/job.model";
+import { CustomError } from "@shared/utils/CustomError";
+import { ERROR_MESSAGES, MESSAGES } from "@shared/constants/messages.constants";
+import { HTTP_STATUS } from "@shared/constants/statusCodes.constants";
+import { CreateInquiryDTO } from "../dtos/public.dto";
+import { InquiryModel } from "@modules/admin/models/admin.model";
 
 
 export class PublicRepository implements IPublicRepository {
@@ -32,60 +38,169 @@ export class PublicRepository implements IPublicRepository {
         return data as SubscriptionPlanModel[];
     }
 
-    // async getCategoryById(id: string): Promise<CategoryModel | null> {
-    //     const { data, error } = await supabaseClient
-    //         .from('categories')
-    //         .select('*')
-    //         .eq('id', id)
-    //         .maybeSingle();
+    async getFeaturedJobs(): Promise<JobModel[]> {
+        const { data, error } = await supabaseClient
+          .from('jobs')
+          .select(`
+            *,
+            employer:employer_profiles (
+              company_name,
+              company_logo_url,
+              industry
+            ),
+            category:job_categories (
+              name,
+              icon
+            )
+          `)
+          .eq('status', 'active')          
+          .order('views_count', { ascending: false })  
+          .limit(6)                         
+      
+        if (error) {
+          throw new CustomError(
+            ERROR_MESSAGES.SERVER_ERROR,
+            HTTP_STATUS.INTERNAL_SERVER_ERROR
+          )
+        }
+      
+        return data as any[]
+    }
 
-    //     if (error) {
-    //         throw error;
-    //     }
+    async getJobById(id: string): Promise<JobModel> {
+        const { data, error } = await supabaseClient
+            .from('jobs')
+            .select(`
+                *,
+                employer:employer_profiles ( company_name, company_logo_url, industry, company_description, website, address ),
+                category:job_categories ( name, icon )
+            `)
+            .eq('id', id)
+            .eq('status', 'active')
+            .single()
 
-    //     return data as CategoryModel | null;
-    // }
+        if (error) {
+            if (error.code === 'PGRST116') {
+                throw new CustomError(MESSAGES.JOB.NOT_FOUND, HTTP_STATUS.NOT_FOUND)
+            }
+            throw new CustomError(ERROR_MESSAGES.SERVER_ERROR, HTTP_STATUS.INTERNAL_SERVER_ERROR)
+        }
 
-    // async createCategory(data: CreateCategoryData): Promise<CategoryModel> {
-    //     const { data: category, error } = await supabaseClient
-    //         .from('categories')
-    //         .insert({
-    //             name: data.name,
-    //             icon: data.icon
-    //         })
-    //         .select()
-    //         .single();
+        return data as any
+    }
+      
+    async getJobs(filters: JobFiltersModel): Promise<{ data: JobModel[]; total: number }> {
+        let query = supabaseClient
+          .from('jobs')
+          .select(`
+            *,
+            employer:employer_profiles ( company_name, company_logo_url, industry ),
+            category:job_categories ( name, icon )
+          `, { count: 'exact' })
+          .eq('status', 'active')   // ← always filter active only for public
+      
+        if (filters.search) {
+          query = query.ilike('title', `%${filters.search}%`)
+        }
+        if (filters.job_type) {
+          query = query.eq('job_type', filters.job_type)
+        }
+        if (filters.category_id) {
+          query = query.eq('category_id', filters.category_id)
+        }
+        if (filters.source) {
+          query = query.eq('source', filters.source)
+        }
+      
+        const page = filters.page || 1
+        const limit = filters.limit || 12
+        const offset = (page - 1) * limit
+      
+        query = query.range(offset, offset + limit - 1)
+      
+        const { data, error, count } = await query
+      
+        if (error) {
+          throw new CustomError(
+            ERROR_MESSAGES.SERVER_ERROR,
+            HTTP_STATUS.INTERNAL_SERVER_ERROR
+          )
+        }
+      
+        return {
+          data: data as any[],
+          total: count || 0
+        }
+    }
 
-    //     if (error) {
-    //         throw error;
-    //     }
+    async createInquiry(data: CreateInquiryDTO): Promise<InquiryModel> {
+        const { data: inquiry, error } = await supabaseClient
+          .from('inquiries')
+          .insert({
+            employer_id: data.employer_id || null,
+            plan_id: data.plan_id || null,
+            subject: data.subject,
+            initial_message: data.initial_message,
+            status: 'open'
+          })
+          .select()
+          .single()
+      
+        if (error) {
+          throw new CustomError(
+            ERROR_MESSAGES.SERVER_ERROR,
+            HTTP_STATUS.INTERNAL_SERVER_ERROR
+          )
+        }
+      
+        return inquiry as InquiryModel
+    }
 
-    //     return category as CategoryModel;
-    // }
+    async findPlanByName(name: string): Promise<SubscriptionPlanModel | null> {
+        const { data, error } = await supabaseClient
+          .from('subscription_plans')
+          .select('*')
+          .eq('name', name)
+          .maybeSingle()
 
-    // async updateCategory(id: string, data: Partial<UpdateCategoryData>): Promise<CategoryModel> {
-    //     const { data: category, error } = await supabaseClient
-    //         .from('categories')
-    //         .update(data)
-    //         .eq('id', id)
-    //         .select()
-    //         .single();
+        if (error) {
+            throw new CustomError(
+                ERROR_MESSAGES.SERVER_ERROR,
+                HTTP_STATUS.INTERNAL_SERVER_ERROR
+            )
+        }
 
-    //     if (error) {
-    //         throw error;
-    //     }
+        return data as SubscriptionPlanModel | null
+    }
 
-    //     return category as CategoryModel;
-    // }
+    async getEmployerProfileByUserId(userId: string): Promise<EmployerProfileModel | null> {
+        const { data, error } = await supabaseClient
+            .from('employer_profiles')
+            .select('*')
+            .eq('user_id', userId)
+            .maybeSingle()
 
-    // async deleteCategory(id: string): Promise<void> {
-    //     const { error } = await supabaseClient
-    //         .from('categories')
-    //         .delete()
-    //         .eq('id', id);
+        if (error) {
+            throw new CustomError(
+                ERROR_MESSAGES.SERVER_ERROR,
+                HTTP_STATUS.INTERNAL_SERVER_ERROR
+            )
+        }
 
-    //     if (error) {
-    //         throw error;
-    //     }
-    // }
+        return data as EmployerProfileModel | null
+    }
+
+    async getTestimonials(): Promise<any[]> {
+        const { data, error } = await supabaseClient
+            .from('testimonials')
+            .select('*')
+            .eq('is_active', true)
+            .order('created_at', { ascending: false })
+
+        if (error) {
+            throw new CustomError(ERROR_MESSAGES.SERVER_ERROR, HTTP_STATUS.INTERNAL_SERVER_ERROR)
+        }
+
+        return data
+    }
 }
