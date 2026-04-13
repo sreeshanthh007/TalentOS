@@ -1,6 +1,6 @@
 import React from 'react'
 import { motion } from 'framer-motion'
-import { Eye, ShieldAlert, Trash2 } from 'lucide-react'
+import { Eye, Trash2 } from 'lucide-react'
 import type { AdminEmployer } from '@/shared/types'
 import { cn } from '@/shared/utils/cn'
 

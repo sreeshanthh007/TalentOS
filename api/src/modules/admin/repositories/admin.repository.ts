@@ -276,13 +276,25 @@ async updatePlan(planId: string, data: UpdatePlanDTO): Promise<SubscriptionPlanM
       .from('inquiries')
       .select(`
         *,
-        employer:employer_profiles(company_name, email, industry),
+        employer:employer_profiles(
+          company_name, 
+          industry,
+          user:users(email)
+        ),
         plan:subscription_plans(display_name)
       `)
       .order('created_at', { ascending: false })
 
     if (error) throw new CustomError(error.message, HTTP_STATUS.INTERNAL_SERVER_ERROR)
-    return data
+
+    return (data as any[]).map(inq => ({
+      ...inq,
+      employer: inq.employer ? {
+        company_name: inq.employer.company_name,
+        industry: inq.employer.industry,
+        email: inq.employer.user?.email || ''
+      } : null
+    }))
   }
 
   async updateInquiryStatus(inquiryId: string, status: string): Promise<void> {

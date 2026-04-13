@@ -3,17 +3,22 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { ChatWindow } from '@/modules/admin/components/ChatWindow'
 import { useMyInquiries } from '../hooks/useMyInquiries'
+import { useInquiryMessages } from '../hooks/useInquiryMessages'
+import { useSendEmployerMessage } from '../hooks/useSendEmployerMessage'
 import { ArrowLeft } from 'lucide-react'
 import { ROUTES } from '@/shared/constants/routes.constants'
-import type { RootState } from '@/shared/store'
+import type { RootState } from '@/store'
 
 const EmployerChatPage: React.FC = () => {
   const { id: inquiryId } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { data: res } = useMyInquiries()
-  const user = useSelector((state: RootState) => state.auth.user)
+  const { data: messagesRes, isLoading } = useInquiryMessages(inquiryId || '')
+  const { mutate: sendMessage, isPending } = useSendEmployerMessage()
+  const employer = useSelector((state: RootState) => state.employer.employer)
 
   const currentInquiry = res?.data.find(q => q.id === inquiryId)
+  const messages = messagesRes?.data || []
 
   if (!inquiryId) return null
 
@@ -41,8 +46,12 @@ const EmployerChatPage: React.FC = () => {
       <ChatWindow 
         inquiryId={inquiryId}
         currentRole="employer"
-        currentUserId={user?.id || ''}
+        currentUserId={employer?.id || ''}
         title="Support Conversation"
+        messages={messages}
+        isLoading={isLoading}
+        onSendMessage={(content) => sendMessage({ inquiry_id: inquiryId, content })}
+        isSending={isPending}
       />
     </div>
   )

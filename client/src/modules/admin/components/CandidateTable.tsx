@@ -1,6 +1,6 @@
 import React from 'react'
 import { motion } from 'framer-motion'
-import { FileText, ShieldAlert, Trash2, Star, MapPin } from 'lucide-react'
+import { FileText, Trash2, Star, MapPin } from 'lucide-react'
 import type { AdminCandidate } from '@/shared/types'
 import { cn } from '@/shared/utils/cn'
 

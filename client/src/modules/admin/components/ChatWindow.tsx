@@ -1,41 +1,44 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
-import { Send,  MessageSquare } from 'lucide-react'
+import { Send, MessageSquare } from 'lucide-react'
 import { format } from 'date-fns'
 import { cn } from '@/shared/utils/cn'
-import { useMessages } from '@/modules/admin/hooks/useMessages'
-import { useSendMessage } from '@/modules/admin/hooks/useSendMessage'
 import { useRealtimeMessages } from '@/shared/hooks/useRealtimeMessages'
+import type { Message } from '@/shared/types'
 
 interface ChatWindowProps {
   inquiryId: string
   currentRole: 'admin' | 'employer'
   currentUserId: string
   title?: string
+  messages: Message[]
+  isLoading: boolean
+  onSendMessage: (content: string) => void
+  isSending: boolean
 }
 
 export const ChatWindow: React.FC<ChatWindowProps> = ({
   inquiryId,
   currentRole,
   currentUserId,
-  title
+  title,
+  messages,
+  isLoading,
+  onSendMessage,
+  isSending
 }) => {
   const [content, setContent] = useState('')
-  const { data: res, isLoading } = useMessages(inquiryId)
-  const { mutate: sendMessage, isPending } = useSendMessage()
   const messagesEndRef = useRef<HTMLDivElement>(null)
   
   useRealtimeMessages(inquiryId)
-
-  const messages = res?.data || []
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
   const handleSend = () => {
-    if (!content.trim() || isPending) return
-    sendMessage({ inquiry_id: inquiryId, content: content.trim() })
+    if (!content.trim() || isSending) return
+    onSendMessage(content.trim())
     setContent('')
   }
 
@@ -120,7 +123,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
             />
             <button 
               onClick={handleSend}
-              disabled={!content.trim() || isPending}
+              disabled={!content.trim() || isSending}
               className="absolute right-3 top-3 w-10 h-10 bg-teal-500 hover:bg-teal-400 disabled:opacity-30 text-white rounded-full flex items-center justify-center transition-all shadow-xl shadow-teal-500/20"
             >
               <Send size={18} />

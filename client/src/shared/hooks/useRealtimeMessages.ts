@@ -20,7 +20,8 @@ export function useRealtimeMessages(inquiryId: string) {
           table: 'messages',
           filter: `inquiry_id=eq.${inquiryId}`
         },
-        (payload) => {
+           (payload) => {
+         console.log("NEW MESSAGE:", payload) 
           // Append new message to existing query cache
           queryClient.setQueryData(
             ['messages', inquiryId],
@@ -38,7 +39,9 @@ export function useRealtimeMessages(inquiryId: string) {
           )
         }
       )
-      .subscribe()
+      .subscribe((status) => {
+  console.log("Realtime status:", status)
+})
 
     return () => {
       supabase.removeChannel(channel)
