@@ -1,15 +1,15 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Building2, ShieldCheck, Camera } from 'lucide-react'
-import { useEmployerProfile } from '../hooks/useEmployerProfile'
-import { useUpdateEmployerProfile } from '../hooks/useUpdateEmployerProfile'
-import { useVerificationDocs } from '../hooks/useVerificationDocs'
-import { useUploadVerificationDoc } from '../hooks/useUploadVerificationDoc'
-import { useSubmitVerification } from '../hooks/useSubmitVerification'
-import { CompanyInfoForm } from '../components/CompanyInfoForm'
-import { VerificationCenter } from '../components/VerificationCenter'
+import { useEmployerProfile } from '@/modules/employer/hooks/useEmployerProfile'
+import { useUpdateEmployerProfile } from '@/modules/employer/hooks/useUpdateEmployerProfile'
+import { useVerificationDocs } from '@/modules/employer/hooks/useVerificationDocs'
+import { useUploadVerificationDoc } from '@/modules/employer/hooks/useUploadVerificationDoc'
+import { useSubmitVerification } from '@/modules/employer/hooks/useSubmitVerification'
+import { CompanyInfoForm } from '@/modules/employer/components/CompanyInfoForm'
+import { VerificationCenter } from '@/modules/employer/components/VerificationCenter'
 import { cn } from '@/shared/utils/cn'
-import { uploadEmployerLogoApi } from '../services/employer.service'
+import { uploadEmployerLogoApi } from '@/modules/employer/services/employer.service'
 import { toast } from 'sonner'
 import { useAppDispatch } from '@/store/hooks'
 import { employerLogin } from '@/store/slices/employerSlice'
@@ -36,11 +36,10 @@ const EmployerProfilePage: React.FC = () => {
        setIsUploadingLogo(true)
        const res = await uploadEmployerLogoApi(file)
        dispatch(employerLogin(res.data))
-       toast.success('Logo updated successfully')
+       toast.success(res.message || 'Logo updated successfully')
        refetch()
-     } catch (err: unknown) {
-       const message = err instanceof Error ? err.message : 'Logo upload failed'
-       toast.error(message)
+     } catch (err: any) {
+       toast.error(err?.response?.data?.message || 'Logo upload failed')
      } finally {
        setIsUploadingLogo(false)
      }

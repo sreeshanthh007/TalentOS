@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { config } from '@shared/config/env.config';
-import { IAIService } from '../interfaces/IAIService';
+import { IAIService } from '@shared/interfaces/IAIService';
 import { CustomError } from '@shared/utils/CustomError';
 import { ERROR_MESSAGES } from '@shared/constants/messages.constants';
 import { HTTP_STATUS } from '@shared/constants/statusCodes.constants';

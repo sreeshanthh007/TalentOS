@@ -1,6 +1,6 @@
 import { supabaseClient } from '@shared/config/db.config';
-import { IAuthRepository } from '../interfaces/IAuthRepository';
-import { UserModel, CreateUserData, CandidateProfileData, EmployerProfileData } from '../models/user.model';
+import { IAuthRepository } from '@modules/auth/interfaces/IAuthRepository';
+import { UserModel, CreateUserData, CandidateProfileData, EmployerProfileData } from '@modules/auth/models/user.model';
 import { CustomError } from '@shared/utils/CustomError';
 import { HTTP_STATUS } from '@shared/constants/statusCodes.constants';
 import { ERROR_MESSAGES } from '@shared/constants/messages.constants';

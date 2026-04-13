@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { getMyApplicationsApi } from '../services/candidate.service'
+import { getMyApplicationsApi } from '@/modules/candidate/services/candidate.service'
 
 export function useMyApplications() {
   return useQuery({

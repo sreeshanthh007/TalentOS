@@ -1,7 +1,7 @@
 import { supabaseClient } from '@shared/config/db.config'
-import { ICandidateRepository } from '../interfaces/ICandidateRepository'
-import { UpdateProfileDTO, ApplyJobDTO } from '../dtos/candidates.dto'
-import { CandidateProfileData, ApplicationModel } from '../../auth/models/user.model'
+import { ICandidateRepository } from '@modules/candidates/interfaces/ICandidateRepository'
+import { UpdateProfileDTO, ApplyJobDTO } from '@modules/candidates/dtos/candidates.dto'
+import { CandidateProfileData, ApplicationModel } from '@modules/auth/models/user.model'
 import { HTTP_STATUS } from '@shared/constants/statusCodes.constants'
 import { CustomError } from '@shared/utils/CustomError'
 

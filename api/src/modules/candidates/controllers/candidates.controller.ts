@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { CandidateUsecase } from '../usecases/candidate.usecase'
+import { CandidateUsecase } from '@modules/candidates/usecases/candidate.usecase'
 import { asyncHandler } from '@shared/utils/asyncHandler'
 import { HTTP_STATUS } from '@shared/constants/statusCodes.constants'
 import { CustomRequest } from '@shared/middlewares/auth.middleware'
@@ -8,7 +8,7 @@ import {
   updateProfileSchema, 
   applyJobSchema, 
   generateResumeSchema 
-} from '../validators/candidates.validator'
+} from '@modules/candidates/validators/candidates.validator'
 
 export class CandidatesController {
   constructor(private readonly candidateUsecase: CandidateUsecase) {}

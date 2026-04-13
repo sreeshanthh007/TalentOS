@@ -1,4 +1,4 @@
-import { IAdminRepository } from '../interfaces/IAdminRepository'
+import { IAdminRepository } from '@modules/admin/interfaces/IAdminRepository'
 import { 
   AdminCandidateModel, 
   AdminEmployerModel, 
@@ -6,12 +6,12 @@ import {
   InquiryModel, 
   MessageModel,
   TestimonialModel
-} from '../models/admin.model'
+} from '@modules/admin/models/admin.model'
 import { 
   UpdatePlanDTO, 
   SendMessageDTO,
   CreateTestimonialDTO
-} from '../dtos/admin.dto'
+} from '@modules/admin/dtos/admin.dto'
 import { SubscriptionPlanModel } from '@modules/employers/models/employer.model'
 import { supabaseClient as supabase } from '@shared/config/db.config'
 import { SupabaseClient } from '@supabase/supabase-js'
